@@ -1,0 +1,45 @@
+{
+  "name": "focux",
+  "version": "1.0.0",
+  "description": "Web focus follows the star.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && npm run compile",
+    "clean": "rm -rf ./output",
+    "compile:esm": "BUILD_ENV=esm BABEL_ENV=esm rollup -c",
+    "compile:cjs": "BUILD_ENV=cjs BABEL_ENV=es5 rollup -c",
+    "compile:umd": "BUILD_ENV=umd BABEL_ENV=es5 rollup -c",
+    "compile": "npm run compile:esm && npm run compile:cjs && npm run compile:umd",
+    "test": "mocha index.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wswmsword/focux.git"
+  },
+  "keywords": [
+    "a11y",
+    "accessiblity",
+    "focus-management",
+    "focus-navigation",
+    "spatial-navigation",
+    "arrow-navigation"
+  ],
+  "author": "wswmsword",
+  "license": "MPL-2.0",
+  "types": "./index.d.ts",
+  "bugs": {
+    "url": "https://github.com/wswmsword/focux/issues"
+  },
+  "homepage": "https://github.com/wswmsword/focux#readme",
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "mocha": "^11.1.0",
+    "rollup": "^4.38.0"
+  },
+  "type": "module",
+  "sideEffects": false
+}
