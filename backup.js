@@ -1,15 +1,97 @@
 
-export default function focux(...squares) {
-  const _squares = squares.map((s, id) => Array.isArray(s) ? { id, loc: s } : s);
-  const { x } = getX(_squares);
-  return x;
-}
+const focux = (function() {
+  const _private = new WeakMap();
+
+  function _focux(..._squares) {
+    /** 是否有子区 */
+    const hasChasm = _squares[1] != null && !Array.isArray(_squares[1]);
+    const squares = hasChasm ? _squares[0] : _squares;
+    /** 子区的矩形们 */
+    const subSqus = hasChasm && _squares[1];
+    /** 各子区框成的虚拟矩形 */
+    const virtuSq = getVirtualSquare(subSqus);
+    const { x, t, b, l, r } = getX(squares.concat(virtuSq));
+    // 计算深渊矩形的各方向，不包括和外部矩形的联系
+    // 匹配深渊矩形和外界矩形的联系，计算方向
+    const xWithSub = getXWithSub(subSqus, x, virtuSq);
+    this.x = xWithSub;
+    _private.set(this, { t, b, l, r });
+    return this;
+  }
+
+  _focux.prototype.next = function(...squares) {
+    const { x: nextX, t: nt, b: nb, l: nl, r: nr  } = getX(squares);
+    const { t, b, l, r } = _private.get(this);
+    const down = nt < b;
+    const up = nb > t;
+    const right = nl > r;
+    const left = nr < l;
+
+    if (down) {
+      // 找到无上方向的新矩形
+      const upS = [];
+      for (const [key, val] of nextX) {
+        if (val.up == null) upS.push(key);
+      }
+      // 找到无下方向的旧矩形
+      const downS = [];
+      for (const [key, val] of this.x) {
+        if (val.down == null) downS.push(key);
+      }
+      // 计算方向
+      downS.forEach(s => {
+        // next down element
+        let minDownDis = Infinity;
+        let downS = null;
+        upS.forEach(s2 => {
+          let dis = getMinDownDis(s, s2);
+          if (dis < minDownDis) {
+            downS = s2;
+            minDownDis = dis;
+          }
+        });
+
+        const dir = this.x.get(s);
+        dir.down = downS;
+      });
+
+      upS.forEach(s => {
+        let minUpDis = Infinity;
+        let upS = null;
+        downS.forEach(s2 => {
+          let dis = getMinUpDis(s, s2);
+          if (dis < minUpDis) {
+            upS = s2;
+            minUpDis = dis;
+          }
+
+          const dir = nextX.get(s);
+          dir.up = upS;
+        });
+      });
+    } else if (up) {
+    } else if (right) {
+    } else if (left) {
+    }
+
+    this.x = new Map([...this.x, nextX]);
+    _private.set(this, { t: nt, b, nb, l, nl, r: nr });
+
+    return this;
+  };
+  
+  _focux.prototype.updateChasm = function() {
+
+  };
+
+  return _focux;
+})();
 
 function getX(...squares) {
   const sortedX = [...squares];
-  sortedX.sort((s1, s2) => s1.loc[0] - s2.loc[0]);
+  sortedX.sort((s1, s2) => s1[0] - s2[0]);
   const sortedY = [...squares];
-  sortedY.sort((s1, s2) => s1.loc[1] - s2.loc[1]);
+  sortedY.sort((s1, s2) => s1[1] - s2[1]);
   const dirMap = new Map();
   let t = -Infinity;
   let b = Infinity;
@@ -17,15 +99,15 @@ function getX(...squares) {
   let r = -Infinity;
 
   squares.forEach(s => {
-    const [x, y, t1, t2] = s.loc;
-    const sOrderY = sortedY.findIndex(e => e.id === s.id);
-    const sOrderX = sortedX.findIndex(e => e.id === s.id);
+    const [x, y, t1, t2] = s;
+    const sOrderY = sortedY.findIndex(e => e === s);
+    const sOrderX = sortedX.findIndex(e => e === s);
 
     // next down element
     let minDownDis = Infinity;
     let downS = null;
     sortedY.slice(0, sOrderY).forEach(s2 => {
-      let dis = getMinDownDis(s.loc, s2.loc);
+      let dis = getMinDownDis(s, s2);
 
       if (dis < minDownDis) {
         downS = s2;
@@ -37,7 +119,7 @@ function getX(...squares) {
     let minUpDis = Infinity;
     let upS = null;
     sortedY.slice(sOrderY + 1).forEach(s2 => {
-      let dis = getMinUpDis(s.loc, s2.loc);
+      let dis = getMinUpDis(s, s2);
 
       if (dis < minUpDis) {
         upS = s2;
@@ -49,7 +131,7 @@ function getX(...squares) {
     let minLDis = Infinity;
     let lS = null;
     sortedX.slice(0, sOrderX).forEach(s2 => {
-      let dis = getMinLeftDis(s.loc, s2.loc);
+      let dis = getMinLeftDis(s, s2);
 
       if (dis < minLDis) {
         lS = s2;
@@ -61,7 +143,7 @@ function getX(...squares) {
     let minRDis = Infinity;
     let rS = null;
     sortedX.slice(sOrderX + 1).forEach(s2 => {
-      const dis = getMinRightDis(s.loc, s2.loc);
+      const dis = getMinRightDis(s, s2);
 
       if (dis < minRDis) {
         rS = s2;
@@ -170,6 +252,18 @@ function getMinRightDis(s, s2) {
   }
 
   return dis;
+}
+
+function getVirtualSquare(chasmSquares) {
+
+}
+
+function getXWithSub() {
+  // 获取 items x
+  // 分别获取无上下左右方向的深渊矩形
+  // 找到下方向是虚拟矩形的外部矩形
+  // 匹配无上方向的深渊矩形和下方向的外部矩形
+  // ...
 }
 
 function getDistance(x1, y1, x2, y2) {
