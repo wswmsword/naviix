@@ -2,8 +2,13 @@
   "name": "focux",
   "version": "1.0.0",
   "description": "Web focus follows the star.",
-  "main": "index.js",
+  "main": "output/focux.js",
+  "exports": {
+    "import": "./output/focux.esm.js",
+    "require": "./output/focux.js"
+  },
   "scripts": {
+    "watch": "npm-watch",
     "build": "npm run clean && npm run compile",
     "clean": "rm -rf ./output",
     "compile:esm": "BUILD_ENV=esm BABEL_ENV=esm rollup -c",
@@ -38,8 +43,23 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "mocha": "^11.1.0",
+    "npm-watch": "^0.13.0",
     "rollup": "^4.38.0"
   },
   "type": "module",
-  "sideEffects": false
+  "sideEffects": false,
+  "watch": {
+    "compile:esm": {
+      "patterns": [
+        "*"
+      ],
+      "extensions": "js",
+      "ignore": [
+        "output",
+        "node_modules",
+        "tests",
+        "example"
+      ]
+    }
+  }
 }
