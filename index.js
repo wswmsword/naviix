@@ -1,11 +1,12 @@
 
 export default function focux(...squares) {
-  const _squares = squares.map((s, id) => Array.isArray(s) ? { id, loc: s } : s);
+  const squares_ = Array.isArray(squares[0]) ? typeof squares[0][0] === "number" ? squares : squares[0] : squares; // [[1, 2], [3, 4], [5, 6]]; [{}, {}, []]; [[[1, 2], [3, 4], [5, 6]]]; [[{}, {}, []]];
+  const _squares = squares_.map((s, id) => Array.isArray(s) ? { id, loc: s } : s);
   const { x } = getX(_squares);
   return x;
 }
 
-function getX(...squares) {
+function getX(squares) {
   const sortedX = [...squares];
   sortedX.sort((s1, s2) => s1.loc[0] - s2.loc[0]);
   const sortedY = [...squares];
@@ -69,7 +70,7 @@ function getX(...squares) {
       }
     });
 
-    dirMap.x.set(s, {
+    dirMap.set(s.id, {
       up: upS,
       down: downS,
       left: lS,
