@@ -91,7 +91,7 @@ function getMinDownDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
-  if (y - t2 > y2 + t2a) { // is below
+  if (y > y2) { // is below
 
     if (x2 - t1a > x + t1) { // is right corner
 
@@ -106,6 +106,7 @@ function getMinDownDis(s, s2) {
       }
     } else { // is project
       dis = Math.pow(y - t2 - y2 - t2a, 2);
+      if (y2 + t2a > y - t2) dis = -dis;
     }
   }
 
@@ -116,7 +117,7 @@ function getMinUpDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
-  if (y + t2 < y2 - t2a) { // is above
+  if (y < y2) { // is above
     if (x2 - t1a > x + t1) { // is right corner
       if (x2 - t1a - x - t1 < y2 - t2a - y - t2) {
         dis = getDistance(x + t1, y + t2, x2 - t1a, y2 - t2a);
@@ -127,6 +128,7 @@ function getMinUpDis(s, s2) {
       }
     } else { // is project
       dis = Math.pow(y2 - t2a - y - t2, 2);
+      if (y2 - t2a < y + t2) dis = -dis;
     }
   }
   return dis;
@@ -136,7 +138,7 @@ function getMinLeftDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
-  if (x - t1 > x2 + t1a) { // is left
+  if (x > x2) { // is left
     if (y2 - t2a > y + t2) { // is top corner
       if (y2 - t2a - y - t2 < x - t1 - x2 - t1a) { // closer x
         dis = getDistance(x - t1, y + t2, x2 + t1a, y2 - t2a);
@@ -147,6 +149,7 @@ function getMinLeftDis(s, s2) {
       }
     } else { // is project
       dis = Math.pow(x - t1 - x2 - t1a, 2);
+      if (x2 + t1a > x - t1) dis = -dis;
     }
   }
   return dis;
@@ -156,7 +159,7 @@ function getMinRightDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
-  if (x2 - t1a > x + t1) { // is right
+  if (x2 > x) { // is right
     if (y2 - t2a > y + t2) { // is top corner
       if (y2 - t2a - y - t2 < x2 - t1a - x - t1) { // closer x
         dis = getDistance(x + t1, y + t2, x2 - t1a, y2 - t2a);
@@ -167,6 +170,8 @@ function getMinRightDis(s, s2) {
       }
     } else {
       dis = Math.pow(x2 - t1a - x - t1, 2);
+      if (x2 - t1a < x + t1) // overlap
+        dis = -dis;
     }
   }
 
