@@ -13,7 +13,8 @@
     "@tailwindcss/vite": "^4.1.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwindcss": "^4.1.4"
+    "tailwindcss": "^4.1.4",
+    "focux": "file:../.."
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",

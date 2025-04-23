@@ -1,0 +1,40 @@
+.rb {
+  display: inline-flex;
+  align-items: center;
+}
+
+.s, .s2 {
+  position: absolute;
+  opacity: 0;
+  font-size: 21px;
+  transform: scale(.3);
+  transition: transform .3s, opacity .3s, left .3s, top .3s, right .3s, bottom .3s;
+}
+
+.s {
+  left: 28px;
+  /* bottom: 0px;  */
+}
+
+.s2 {
+  /* top: 0; */
+  right: 22px;
+}
+
+.rb:focus {
+  z-index: 2;
+}
+
+.rb:focus .s {
+  left: -13px;
+  /* bottom: -6px; */
+  transform: scale(1) rotate(360deg);
+  opacity: 1;
+}
+
+.rb:focus .s2 {
+  /* top: -6px; */
+  right: -13px;
+  transform: scale(1) rotate(360deg);
+  opacity: 1;
+}
