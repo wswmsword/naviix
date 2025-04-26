@@ -44,9 +44,14 @@ export default function RandomButtons({ maxCount }: RandomButtonsProps) {
     focuXMap.current = focux(squares);
   }, [buttons])
 
+  useEffect(() => {
+    document.getElementById("bg")?.focus();
+  }, []);
+
   return (
-    <div id="bg" className="relative w-full h-screen bg-[#0b162c] overflow-hidden" onKeyDown={nav} tabIndex={0}>
-      <h1 className="absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic">Focux</h1>
+    <div id="bg" className="relative w-full h-screen bg-[#0b162c] overflow-hidden" onKeyDown={nav} tabIndex={-1}>
+      <h1 aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic ${styles.h}`}>Focux</h1>
+      <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic ${styles.hh}`}>Focux</h1>
       <p className="absolute text-8xl font-semibold text-[#1f2f4d]">请使用键盘的上、下、左、右键完成导航</p>
       {buttons.map((button, i) => (
         <button
@@ -74,7 +79,7 @@ export default function RandomButtons({ maxCount }: RandomButtonsProps) {
 
   function nav(e: KeyboardEvent<HTMLDivElement>) {
     const cur = document.activeElement;
-    if (cur?.id === "bg") {
+    if (cur?.id === "bg" && ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
       btnsRef.current[0]?.focus();
     } else {
       const next = focuXMap.current.get(cur);

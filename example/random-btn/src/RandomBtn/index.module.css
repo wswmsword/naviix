@@ -38,3 +38,12 @@
   transform: scale(1) rotate(360deg);
   opacity: 1;
 }
+
+.h {
+  text-shadow: 1px 1px 0 #ddd65f,2px 2px 0 #ddd65f;
+}
+.hh {
+  background: linear-gradient(270deg, #1f2f4d, #081631);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
