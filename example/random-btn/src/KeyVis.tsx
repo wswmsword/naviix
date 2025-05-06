@@ -67,7 +67,7 @@ export default function KeyVisualizer() {
       {visible && (
         <motion.div
           key={animationKey} // 每次按键重新触发整体动画
-          className="fixed left-5 bottom-5 px-5 py-3 bg-black text-white rounded-full shadow-lg text-xl font-semibold"
+          className="fixed left-5 bottom-5 px-5 py-3 bg-black text-white rounded-full shadow-lg text-xl font-semibold z-10"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}

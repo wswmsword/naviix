@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, KeyboardEvent } from "react";
+import { useEffect, useRef, useState, KeyboardEvent, useImperativeHandle } from "react";
 import focux from "focux";
 import styles from "./index.module.css";
+import { motion, useAnimation } from "framer-motion";
 
 interface RandomButtonsProps {
   maxCount: number;
@@ -10,6 +11,8 @@ interface ButtonData {
   id: number;
   top: number;
   left: number;
+  width: number;
+  height: number;
 }
 
 export default function RandomButtons({ maxCount }: RandomButtonsProps) {
@@ -17,15 +20,33 @@ export default function RandomButtons({ maxCount }: RandomButtonsProps) {
   const btnsRef = useRef<(HTMLElement|null)[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const focuXMap = useRef<any>(null);
+  const curDir = useRef<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const btnsAnime = useRef<any>(new Map());
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.15, // 每个子按钮间隔动画时间
+      },
+    },
+  };
+  
 
   const generateButtons = () => {
     const count = Math.floor(Math.random() * maxCount) + 1;
     const newButtons: ButtonData[] = Array.from({ length: count }, (_, index) => ({
       id: index,
-      top: Math.random() * 90,
-      left: Math.random() * 90,
+      top: Math.random() * 60 + 20,
+      left: Math.random() * 80 + 10,
+      width: 80 + Math.random() * 70,
+      height: 80 + Math.random() * 70,
     }));
     setButtons(newButtons);
+    setTimeout(() => {
+      document.getElementById("bg")?.focus();
+    }, 16);
   };
 
   useEffect(() => {
@@ -45,55 +66,102 @@ export default function RandomButtons({ maxCount }: RandomButtonsProps) {
   }, [buttons])
 
   useEffect(() => {
-    document.getElementById("bg")?.focus();
+    setTimeout(() => {
+      document.getElementById("bg")?.focus();
+    }, 16);
   }, []);
 
   return (
-    <div id="bg" className="relative w-full h-screen bg-[#0b162c] overflow-hidden" onKeyDown={nav} tabIndex={-1}>
-      <h1 aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic ${styles.h}`}>Focux</h1>
+    <motion.div
+      key={buttons.length}
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible" id="bg" className="relative w-full h-screen overflow-hidden" onKeyDown={nav} tabIndex={-1}>
+      <h1 aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic pointer-events-none ${styles.h}`}>Focux</h1>
       <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic ${styles.hh}`}>Focux</h1>
       <p className="absolute text-8xl font-semibold text-[#1f2f4d]">请使用键盘的上、下、左、右键完成导航</p>
-      {buttons.map((button, i) => (
-        <button
-          ref={e => { btnsRef.current[i] = e }}
-          key={button.id}
-          onClick={generateButtons}
-          style={{
-            position: "absolute",
-            top: `${button.top}%`,
-            left: `${button.left}%`,
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            background: "rgba(255, 255, 255, 0.2)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-          }}
-          className={`${styles.rb} px-4 py-2 text-white rounded-full shadow-sm transition transform hover:scale-110 focus:scale-110 active:scale-95 hover:bg-white hover:bg-opacity-30 focus:outline-none`}
-        >
-          Button {button.id + 1}
-          <span className={styles.s}>🌟</span>
-          <span className={styles.s2}>🌟</span>
-        </button>
-      ))}
-    </div>
+      {buttons.map((button, i) => <Btn key={i} bInfo={button} ref={e => { btnsRef.current[i] = e }} clickCb={generateButtons} curDir={curDir} animeRef={e => { btnsAnime.current.set(btnsRef.current[i], e) }} />)}
+    </motion.div>
   );
 
   function nav(e: KeyboardEvent<HTMLDivElement>) {
     const cur = document.activeElement;
+    curDir.current = "e"; // Enter
     if (cur?.id === "bg" && ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
       btnsRef.current[0]?.focus();
     } else {
       const next = focuXMap.current.get(cur);
       if (next) {
+        let nextE: HTMLButtonElement | null = null;
         if (e.key === "ArrowDown") {
-          if (next.down) next.down.id.focus();
+          curDir.current = "d";
+          if (next.down) nextE = next.down.id;
         } else if (e.key === "ArrowUp") {
-          if (next.up) next.up.id.focus();
+          curDir.current = "u";
+          if (next.up) nextE = next.up.id;
         } else if (e.key === "ArrowLeft") {
-          if (next.left) next.left.id.focus();
+          curDir.current = "l";
+          if (next.left) nextE = next.left.id;
         } else if (e.key === "ArrowRight") {
-          if (next.right) next.right.id.focus();
+          curDir.current = "r";
+          if (next.right) nextE = next.right.id;
+        }
+        if (nextE) nextE.focus();
+        else {
+          btnsAnime.current.get(cur)?.handleFocus();
         }
       }
     }
   }
+}
+
+function Btn({ clickCb, bInfo, ref, curDir, animeRef }) {
+
+  const controls = useAnimation();
+  const [f, setF] = useState(false);
+
+  const handleFocus = () => {
+    const xy = curDir.current === "u" ? { y: [-25, 0] } : curDir.current === "d" ? { y: [25, 0] } : curDir.current === "l" ? { x: [-25, 0] } : curDir.current === "r" ? { x: [25, 0] } : { scale: [0.8, 1] }
+    controls.start({
+      ...xy,
+      transition: { duration: 0.5 },
+    });
+    setF(true);
+  };
+
+  const btnVariants = {
+    hidden: { opacity: 0, scale: 0 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.3 },
+    },
+  };
+
+  useImperativeHandle(animeRef, () => ({
+    handleFocus,
+  }));
+
+  return <motion.span
+    style={{
+      position: "absolute",
+      top: `${bInfo.top}%`,
+      left: `${bInfo.left}%`,
+      width: `${bInfo.width}px`,
+      height: `${bInfo.height}px`,
+      zIndex: f ? 2 : undefined,
+    }}
+    variants={btnVariants}>
+    <motion.button
+      onFocus={handleFocus}
+      onBlur={() => setF(false)}
+      animate={controls}
+      whileHover={{ scale: 1.2, transition: { duration: 0.1 } }}
+      ref={ref}
+      onClick={clickCb}
+      className={`${styles.rb} px-4 py-2 rounded-xl shadow-sm active:scale-95 focus:z-10`}>
+      <span className={`${styles.rbt2} pointer-events-none`} aria-hidden="true">B{bInfo.id + 1}</span>
+      <span className={styles.rbt}>B{bInfo.id + 1}</span>
+    </motion.button>
+  </motion.span>;
 }

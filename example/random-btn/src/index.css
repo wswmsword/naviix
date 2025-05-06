@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+#root {
+  background: #0b162c;
+}
+
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
