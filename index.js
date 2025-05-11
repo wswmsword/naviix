@@ -1,31 +1,41 @@
 
 export default function focux(squares) {
   const formattedSquares = formatIpt(squares);
-  const x = getX(formattedSquares);
+
+  const { x: rawX, firstInWrap } = getX(formattedSquares);
+  const x = genUserX(rawX, firstInWrap);
   return x;
 }
 
 function getX(squares, notRoot) {
   let mergedX = new Map();
+  let firstInWrap = new Map();
 
   if (!notRoot && squares.length > 1) { // 位于 root，且区域数量大于 1
     const wraps = squares.map(info => info.wrap);
+    squares.forEach(s => {
+      firstInWrap.set(s.wrap.id, s.locs[0]);
+    });
     const { x } = getXBySimple(wraps);
-    mergedX = new Map([...mergedX, ...x]);
+    mergedX = x;
   }
 
-  squares.forEach(({ locs, subs }) => {
+  squares.forEach(({ locs, subs, wrap }) => {
     const subWraps = (subs || []).map(s => s.wrap);
+    (subs || []).map(s => {
+      firstInWrap.set(s.wrap.id, s.locs[0]);
+    });
     const newLocs = locs.concat(subWraps);
-    const { x } = getXBySimple(newLocs);
-    const subsX = getX(subs || [], true);
+    const { x } = getXBySimple(newLocs, wrap, subWraps);
+    const { x: subsX, firstInWrap: _firstInWrap } = getX(subs || [], true);
     mergedX = new Map(Array.from(mergedX).concat(Array.from(x)).concat(Array.from(subsX)));
+    firstInWrap = new Map(Array.from(firstInWrap).concat(Array.from(_firstInWrap)));
   });
 
-  return mergedX;
+  return { x: mergedX, firstInWrap };
 }
 
-function getXBySimple(squares) {
+function getXBySimple(squares, wrap, subWraps) {
   const sortedX = [...squares];
   sortedX.sort((s1, s2) => s1.loc[0] - s2.loc[0]);
   const sortedY = [...squares];
@@ -43,11 +53,13 @@ function getXBySimple(squares) {
 
     // next down element
     let minDownDis = Infinity;
-    let downS = null;
+    let downS = wrap; // 默认指向包裹层
+    let gotDown = false;
     sortedY.slice(0, sOrderY).forEach(s2 => {
       let dis = getMinDownDis(s.loc, s2.loc);
 
       if (dis < minDownDis) {
+        gotDown = true;
         downS = s2;
         minDownDis = dis;
       }
@@ -55,11 +67,13 @@ function getXBySimple(squares) {
 
     // next up element
     let minUpDis = Infinity;
-    let upS = null;
+    let upS = wrap;
+    let gotUp = false;
     sortedY.slice(sOrderY + 1).forEach(s2 => {
       let dis = getMinUpDis(s.loc, s2.loc);
 
       if (dis < minUpDis) {
+        gotUp = true;
         upS = s2;
         minUpDis = dis;
       }
@@ -67,11 +81,13 @@ function getXBySimple(squares) {
 
     // next left element
     let minLDis = Infinity;
-    let lS = null;
+    let lS = wrap;
+    let gotLeft = false;
     sortedX.slice(0, sOrderX).forEach(s2 => {
       let dis = getMinLeftDis(s.loc, s2.loc);
 
       if (dis < minLDis) {
+        gotLeft = true;
         lS = s2;
         minLDis = dis;
       }
@@ -79,11 +95,13 @@ function getXBySimple(squares) {
 
     // next right element
     let minRDis = Infinity;
-    let rS = null;
+    let rS = wrap;
+    let gotRight = false;
     sortedX.slice(sOrderX + 1).forEach(s2 => {
       const dis = getMinRightDis(s.loc, s2.loc);
 
       if (dis < minRDis) {
+        gotRight = true;
         rS = s2;
         minRDis = dis;
       }
@@ -94,6 +112,18 @@ function getXBySimple(squares) {
       down: downS,
       left: lS,
       right: rS,
+      nextWrap: { // 指向元素是否为包裹层
+        up: !gotUp,
+        down: !gotDown,
+        right: !gotRight,
+        left: !gotLeft,
+      },
+      nextSubWrap: { // 是否内部的包裹层
+        up: subWraps.includes(upS),
+        down: subWraps.includes(downS),
+        right: subWraps.includes(rS),
+        left: subWraps.includes(lS),
+      },
     });
 
     // 更新边界
@@ -248,4 +278,43 @@ function formatIpt(input) {
     });
   }
   return formatted;
+}
+
+function genUserX(rawX, firstInWrap) {
+  const x = new Map();
+  rawX.forEach((val, key) => {
+    const { up, right, down, left, nextWrap, nextSubWrap } = val;
+    const { up: upWrap, right: rWrap, down: downWrap, left: lWrap } = nextWrap;
+    const { up: upSubW, right: rSubW, down: dSubWrap, left: lSubW } = nextSubWrap;
+
+    const userUp = genUserDir("up", up, upWrap, upSubW);
+    const userRight = genUserDir("right", right, rWrap, rSubW);
+    const userDown = genUserDir("down", down, downWrap, dSubWrap);
+    const userLeft = genUserDir("left", left, lWrap, lSubW);
+
+    x.set(key, {
+      up: userUp,
+      right: userRight,
+      down: userDown,
+      left: userLeft,
+    });
+  });
+
+  return x;
+
+  function genUserDir(dirStr, rawDir, wrap, subW) {
+    let userDir = rawDir;
+    if (rawDir && wrap) { // 是否指向包裹层
+      const wrapTarget = rawX.get(rawDir.id);
+      const { nextSubWrap } = wrapTarget;
+      userDir = wrapTarget[dirStr];
+      if (nextSubWrap[dirStr]) {
+        userDir = firstInWrap.get(wrapTarget[dirStr].id);
+      }
+    } else if (subW) { // 是否指向子包裹层
+      userDir = firstInWrap.get(rawDir.id);
+    }
+
+    return userDir;
+  }
 }
