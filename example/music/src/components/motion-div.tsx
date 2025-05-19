@@ -9,6 +9,7 @@ export default function MDiv({ children, ...otherProps }: { children: ReactNode 
 
   const handleFocus = () => {
     const xy = curDir?.current === "u" ? { y: [-9, 0] } : curDir?.current === "d" ? { y: [9, 0] } : curDir?.current === "l" ? { x: [-9, 0] } : curDir?.current === "r" ? { x: [9, 0] } : { scale: [0.94, 1] }
+    if (curDir) curDir.current = "e";
     controls.start({
       ...xy,
       transition: { duration: 0.5 },

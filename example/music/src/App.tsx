@@ -52,11 +52,10 @@ function App() {
   }
 
   function nav(e: KeyboardEvent<HTMLDivElement>) {
-    const es = fc?.getFocusableElements() || [];
     const cur = document.activeElement;
     curDir.current = "e"; // Enter
     if (cur?.id === "bg" && ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
-      es[0]?.focus();
+      focuXMap.current.keys().next().value.focus();
     } else {
       const next = focuXMap.current.get(cur);
       if (next) {
@@ -88,7 +87,7 @@ function App() {
 
   function updateFocuxMap() {
     const es = fc?.getFocusableElements();
-    const locs = (es || []).map(mapLoc);
+    const locs = (es || []).map(mapLoc).filter(item => item.loc[2] !== 0);
     // const listEs = fc?.groupElementsRef.current.get("list") || [];
     // const listLocs = listEs.map(mapLoc);
     // const config = {

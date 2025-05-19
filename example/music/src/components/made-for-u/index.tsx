@@ -13,9 +13,9 @@ import { toast } from "sonner";
 
 export default function MadeForU() {
   return <>
-    <div className="px-8 mt-6 space-y-1">
+    <div className="px-8 space-y-1">
       <h2 className="text-2xl font-semibold tracking-tight">精选推荐</h2>
-      <p className="text-sm text-muted-foreground">根据您的音乐口味推荐，每天 25:00 更新（<span className="decoration-wavy underline">请使用键盘的上、下、左、右键完成导航。</span>）</p>
+      <p className="text-sm text-muted-foreground">根据您的音乐口味推荐，每天 25:00 更新（<strong>请使用键盘的上、下、左、右键完成导航。</strong>）</p>
       <Separator className="my-4" />
     </div>
     <div className="px-8 flex gap-3 w-full flex-wrap">
@@ -32,10 +32,10 @@ export default function MadeForU() {
 
 function CoverInfo({ title, artist, src }: { title: string, artist: string, src: string }) {
   const { register, unregister } = useContext(FocusContext) || {};
-  return <div className="space-y-3 shrink-0 w-[150px]">
-    <MDiv className="w-[150px] h-[150px]">
-      <button className="rounded-md overflow-hidden w-[150px] h-[150px]" ref={ref} onClick={() => toast("点了 1 下")}>
-        <img src={src} className="w-auto h-auto object-cover transition-all hover:scale-105" width={150} height={150} />
+  return <div className="space-y-3 shrink-0 w-[100px] lg:w-[150px]">
+    <MDiv className="w-full h-[100px] lg:h-[150px]">
+      <button className="rounded-md overflow-hidden w-full h-full" ref={ref} onClick={() => toast("点了 1 下")}>
+        <img src={src} className="w-auto h-auto object-cover transition-all hover:scale-105" />
       </button>
     </MDiv>
     <div className="space-y-1 text-sm">
