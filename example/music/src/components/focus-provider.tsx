@@ -1,4 +1,4 @@
-import { useRef, useCallback, type ReactNode } from 'react';
+import { useRef, useCallback, type ReactNode, useState } from 'react';
 import { FocusContext } from '@/context';
 
 export const FocusProvider = ({ children }: { children: ReactNode }) => {
@@ -8,6 +8,10 @@ export const FocusProvider = ({ children }: { children: ReactNode }) => {
   const groupElementsRef = useRef<Map<string, any>>(new Map());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const animeFocusHandlerRef = useRef<Map<HTMLDivElement, any>>(new Map());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const focuXMap = useRef<any>(null);
+  const lastFocusedE = useRef<HTMLElement | null>(null);
+  const [resCurDir, setCurDir] = useState("");
 
   const register = useCallback((el: HTMLElement, key?: string) => {
     if (key) {
@@ -39,7 +43,7 @@ export const FocusProvider = ({ children }: { children: ReactNode }) => {
   const getFocusableElements = useCallback(() => focusableElementsRef.current, []);
 
   return (
-    <FocusContext.Provider value={{ register, unregister, getFocusableElements, curDir, animeFocusHandlerRef, groupElementsRef }}>
+    <FocusContext.Provider value={{ register, unregister, getFocusableElements, curDir, animeFocusHandlerRef, groupElementsRef, focuXMap, lastFocusedE, resCurDir, setCurDir }}>
       {children}
     </FocusContext.Provider>
   );

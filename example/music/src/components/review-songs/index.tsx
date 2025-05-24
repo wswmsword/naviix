@@ -2,7 +2,7 @@ import { Separator } from "../ui/separator";
 import p1 from "../../assets/p1.jpg";
 import p2 from "../../assets/p2.jpg";
 import p3 from "../../assets/p3.jpg";
-import p4 from "../../assets/p4.jpg";
+import p8 from "../../assets/p8.jpg";
 import { FocusContext } from "@/context";
 import { useContext } from "react";
 import MDiv from "../motion-div";
@@ -18,7 +18,7 @@ export default function ReviewSongs({ updateFocuxMap }: { updateFocuxMap: () => 
       <CoverInfo src={p1} title="朵（Dorr）" artist="赵雷" />
       <CoverInfo src={p2} title="生如夏花" artist="朴树" />
       <CoverInfo src={p3} title="Across The Universe" artist="The Beatles" />
-      <CoverInfo src={p4} title="How Long Will I Love You" artist="Jon Boden，Sam Sweeney，Ben Coleman" />
+      <CoverInfo src={p8} title="Hero" artist="Family of the Year" />
     </div>
   </>;
 }

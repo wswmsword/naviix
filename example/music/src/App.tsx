@@ -3,16 +3,16 @@ import ReviewSongs from "./components/review-songs";
 import MadeForU from "./components/made-for-u";
 import MusicChips from "./components/music-chips";
 import { use, useEffect, useRef } from "react";
-import { FocusContext } from "./context";
+import { FocusContext, type FocusContextType } from "./context";
 import focux from "focux";
 import type { KeyboardEvent } from "react";
 
 function App() {
 
-  const fc = use(FocusContext);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const focuXMap = useRef<any>(null);
+  const fc = use(FocusContext) as FocusContextType;
+  const focuXMap = fc.focuXMap;
   const curDir = fc?.curDir || { current: "" };
+  const { setCurDir } = fc;
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ function App() {
   }, []);
 
   return (
-    <div id="bg" className="flex h-full relative overflow-hidden" onKeyDown={nav} tabIndex={-1} ref={container}>
+    <div id="bg" className="flex h-full relative overflow-hidden" onKeyDown={nav} onKeyUp={keyUp} tabIndex={-1} ref={container}>
       <div aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic pointer-events-none h z-0`}>Focux</div>
       <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic hh z-0`}>Focux</h1>
       <SideBar updateFocuxMap={updateFocuxMap} />
@@ -53,28 +53,34 @@ function App() {
 
   function nav(e: KeyboardEvent<HTMLDivElement>) {
     const cur = document.activeElement;
-    curDir.current = "e"; // Enter
+    const dirMap = new Map([
+      ["ArrowDown", "d"],
+      ["ArrowUp", "u"],
+      ["ArrowLeft", "l"],
+      ["ArrowRight", "r"],
+    ])
     if (cur?.id === "bg" && ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      curDir.current = dirMap.get(e.key) as string;
       focuXMap.current.keys().next().value.focus();
     } else {
       const next = focuXMap.current.get(cur);
       if (next) {
         let nextE: HTMLButtonElement | null = null;
+        curDir.current = dirMap.get(e.key) as string;
+        setCurDir(curDir.current || "");
         if (e.key === "ArrowDown") {
-          curDir.current = "d";
           if (next.down) nextE = next.down.id;
         } else if (e.key === "ArrowUp") {
-          curDir.current = "u";
           if (next.up) nextE = next.up.id;
         } else if (e.key === "ArrowLeft") {
-          curDir.current = "l";
           if (next.left) nextE = next.left.id;
         } else if (e.key === "ArrowRight") {
-          curDir.current = "r";
           if (next.right) nextE = next.right.id;
         }
-        if (nextE) nextE.focus();
-        else {
+        if (nextE) {
+          nextE.focus();
+          fc.lastFocusedE.current = nextE;
+        } else {
           const animeFocusHandlerRef = fc?.animeFocusHandlerRef;
           animeFocusHandlerRef?.current.get(cur?.parentElement as HTMLDivElement)?.();
         }
@@ -83,6 +89,10 @@ function App() {
     if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
       e.preventDefault();
     }
+  }
+
+  function keyUp() {
+    setCurDir("");
   }
 
   function updateFocuxMap() {

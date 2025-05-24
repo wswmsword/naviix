@@ -1,14 +1,19 @@
 import { Button } from "../ui/button";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { FocusContext } from "@/context";
 import MDiv from "../motion-div";
 import { toast } from "sonner";
 import { Github } from "lucide-react";
+import DraggableModal from "./dragable-modal";
+import { ModeToggle } from "../theme";
+import { RainbowButton } from "../magicui/rainbow-button";
+import { Pointer } from "../magicui/pointer";
 
 export default function MusicChips() {
   const { register, unregister } = useContext(FocusContext) || {};
+  const [openedKey, setK] = useState(false);
   return <div className="px-8 flex gap-3 flex-wrap">
-    <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>焕活能量</Button></MDiv>
+    <MDiv><Button ref={ref} onClick={() => setK(v => !v)}>🎹 切换键盘</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>休闲放松</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>轻松愉悦</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>派对</Button></MDiv>
@@ -18,8 +23,10 @@ export default function MusicChips() {
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>伤心难过</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>专注</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>睡眠</Button></MDiv>
-    <MDiv><Button asChild ref={ref}><a href="https://github.com/wswmsword/focux" target="_blank"><Github />GitHub</a></Button></MDiv>
+    <MDiv><RainbowButton variant="outline" asChild ref={ref}><a href="https://github.com/wswmsword/focux" target="_blank"><Pointer><span className="text-2xl relative -top-3">⭐️</span></Pointer><Github />GitHub</a></RainbowButton></MDiv>
     <MDiv><Button asChild ref={ref}><a href="https://wswmsword.github.io/examples/focux/" target="_blank">🎲 按钮试炼</a></Button></MDiv>
+    <ModeToggle />
+    <DraggableModal opened={openedKey} />
   </div>;
 
   function ref(e: HTMLButtonElement) {
