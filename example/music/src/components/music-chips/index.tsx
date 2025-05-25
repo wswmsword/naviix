@@ -1,5 +1,5 @@
 import { Button } from "../ui/button";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FocusContext } from "@/context";
 import MDiv from "../motion-div";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import DraggableModal from "./dragable-modal";
 import { ModeToggle } from "../theme";
 import { RainbowButton } from "../magicui/rainbow-button";
 import { Pointer } from "../magicui/pointer";
+import GuideModal from "./guide-modal";
 
 export default function MusicChips() {
   const { register, unregister } = useContext(FocusContext) || {};
@@ -23,10 +24,11 @@ export default function MusicChips() {
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>伤心难过</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>专注</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>睡眠</Button></MDiv>
-    <MDiv><RainbowButton variant="outline" asChild ref={ref}><a href="https://github.com/wswmsword/focux" target="_blank"><Pointer><span className="text-2xl relative -top-3">⭐️</span></Pointer><Github />GitHub</a></RainbowButton></MDiv>
+    <MDiv><RainbowButton variant="outline" asChild ref={ref}><a href="https://github.com/wswmsword/focux" target="_blank"><Pointer><span className="text-2xl relative -top-3 -left-3">⭐️</span></Pointer><Github />GitHub</a></RainbowButton></MDiv>
     <MDiv><Button asChild ref={ref}><a href="https://wswmsword.github.io/examples/focux/" target="_blank">🎲 按钮试炼</a></Button></MDiv>
     <ModeToggle />
     <DraggableModal opened={openedKey} />
+    <GuideModal setK={setK} />
   </div>;
 
   function ref(e: HTMLButtonElement) {

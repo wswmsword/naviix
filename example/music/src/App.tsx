@@ -5,7 +5,7 @@ import MusicChips from "./components/music-chips";
 import { use, useEffect, useRef } from "react";
 import { FocusContext, type FocusContextType } from "./context";
 import focux from "focux";
-import type { KeyboardEvent } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 function App() {
 
@@ -14,30 +14,42 @@ function App() {
   const curDir = fc?.curDir || { current: "" };
   const { setCurDir } = fc;
   const container = useRef<HTMLDivElement>(null);
+  const debouncedFocux = useDebouncedCallback(
+    // function
+    updateFocuxMap,
+    // delay in ms
+    66
+  );
 
   useEffect(() => {
-    updateFocuxMap();
+    debouncedFocux();
 
     setTimeout(() => {
-      document.getElementById("bg")?.focus();
+      document.addEventListener("keydown", nav);
+      document.addEventListener("keyup", keyUp);
     }, 16);
 
     const ro = new ResizeObserver(() => {
-      updateFocuxMap();
+      debouncedFocux();
     });
 
     // 观察一个或多个元素
     ro.observe(container.current as HTMLDivElement);
+
+    return () => {
+      document.removeEventListener("keydown", nav);
+      document.removeEventListener("keyup", keyUp);
+    };
   }, []);
 
   return (
-    <div id="bg" className="flex h-full relative overflow-hidden" onKeyDown={nav} onKeyUp={keyUp} tabIndex={-1} ref={container}>
+    <div className="flex h-full relative overflow-hidden" ref={container}>
       <div aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic pointer-events-none h z-0`}>Focux</div>
       <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic hh z-0`}>Focux</h1>
-      <SideBar updateFocuxMap={updateFocuxMap} />
-      <div className="py-4 shrink min-w-0 grow overflow-y-auto z-1">
+      <SideBar updateFocuxMap={debouncedFocux} />
+      <div className="py-4 shrink min-w-0 grow overflow-y-auto z-1" onScroll={debouncedFocux}>
         <MusicChips />
-        <ReviewSongs updateFocuxMap={updateFocuxMap} />
+        <ReviewSongs updateFocuxMap={debouncedFocux} />
         <MadeForU />
       </div>
     </div>
@@ -51,7 +63,7 @@ function App() {
     return { id: e, loc: [x + halfW, -y - halfH, halfW, halfH] };
   }
 
-  function nav(e: KeyboardEvent<HTMLDivElement>) {
+  function nav(e: KeyboardEvent) {
     const cur = document.activeElement;
     const dirMap = new Map([
       ["ArrowDown", "d"],
@@ -59,11 +71,11 @@ function App() {
       ["ArrowLeft", "l"],
       ["ArrowRight", "r"],
     ])
-    if (cur?.id === "bg" && ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+    const next = focuXMap.current.get(cur);
+    if (next == null && ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
       curDir.current = dirMap.get(e.key) as string;
       focuXMap.current.keys().next().value.focus();
     } else {
-      const next = focuXMap.current.get(cur);
       if (next) {
         let nextE: HTMLButtonElement | null = null;
         curDir.current = dirMap.get(e.key) as string;
