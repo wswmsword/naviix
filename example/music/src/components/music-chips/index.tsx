@@ -1,5 +1,5 @@
 import { Button } from "../ui/button";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { FocusContext } from "@/context";
 import MDiv from "../motion-div";
 import { toast } from "sonner";
@@ -17,7 +17,6 @@ export default function MusicChips() {
     <MDiv><Button ref={ref} onClick={() => setK(v => !v)}>🎹 切换键盘</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>休闲放松</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>轻松愉悦</Button></MDiv>
-    <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>派对</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>健身</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>通勤</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>浪漫</Button></MDiv>

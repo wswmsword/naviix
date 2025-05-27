@@ -48,9 +48,11 @@ function App() {
       <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic hh z-0`}>Focux</h1>
       <SideBar updateFocuxMap={debouncedFocux} />
       <div className="py-4 shrink min-w-0 grow overflow-y-auto z-1" onScroll={debouncedFocux}>
-        <MusicChips />
-        <ReviewSongs updateFocuxMap={debouncedFocux} />
-        <MadeForU />
+        <div className="max-w-[1188px] mx-auto">
+          <MusicChips />
+          <ReviewSongs updateFocuxMap={debouncedFocux} />
+          <MadeForU />
+        </div>
       </div>
     </div>
   );
