@@ -4,8 +4,11 @@
   "description": "Web focus follows the star.",
   "main": "output/focux.js",
   "exports": {
-    "import": "./output/focux.esm.js",
-    "require": "./output/focux.js"
+    ".": {
+      "import": "./output/focux.esm.js",
+      "require": "./output/focux.js",
+      "types": "./index.d.ts"
+    }
   },
   "scripts": {
     "watch": "npm-watch",

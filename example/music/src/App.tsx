@@ -60,7 +60,7 @@ function App() {
     const { x, y, width, height } = t;
     const halfW = width / 2;
     const halfH = height / 2;
-    return { id: e, loc: [x + halfW, -y - halfH, halfW, halfH] };
+    return { id: e, loc: [x + halfW, -y - halfH, halfW, halfH] as [number, number, number, number] };
   }
 
   function nav(e: KeyboardEvent) {

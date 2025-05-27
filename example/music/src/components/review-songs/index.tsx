@@ -15,7 +15,7 @@ export default function ReviewSongs({ updateFocuxMap }: { updateFocuxMap: () => 
     <Separator className="mt-4" />
     </div>
     <div className="px-8 pt-4 pb-6 flex gap-4 overflow-x-auto w-full" onScroll={updateFocuxMap}>
-      <CoverInfo src={p1} title="朵（Dorr）" artist="赵雷" />
+      <CoverInfo src={p1} title="梦中的哈德森" artist="赵雷" />
       <CoverInfo src={p2} title="生如夏花" artist="朴树" />
       <CoverInfo src={p3} title="Across The Universe" artist="The Beatles" />
       <CoverInfo src={p8} title="Hero" artist="Family of the Year" />

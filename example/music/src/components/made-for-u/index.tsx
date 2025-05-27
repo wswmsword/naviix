@@ -19,7 +19,7 @@ export default function MadeForU() {
       <Separator className="my-4" />
     </div>
     <div className="px-8 flex gap-3 w-full flex-wrap">
-      <CoverInfo src={p1} title="无法长大" artist="赵雷" />
+      <CoverInfo src={p1} title="吉姆餐厅" artist="赵雷" />
       <CoverInfo src={p2} title="生如夏花" artist="朴树" />
       <CoverInfo src={p3} title="Let It Be" artist="The Beatles" />
       <CoverInfo src={p4} title="About Time" artist="Various Artists" />
