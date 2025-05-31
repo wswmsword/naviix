@@ -18,7 +18,7 @@ type objSquares = {
 
 type arySquares = Array<subLocs>;
 
-type directionLoc = baseAryLoc;
+type directionLoc = baseObjLoc;
 
 declare function focux(squares: simpleSquares | objSquares | arySquares):
   Map<any, { up?: directionLoc; down?: directionLoc; left?: directionLoc; right?: directionLoc }>;

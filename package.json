@@ -5,9 +5,9 @@
   "main": "output/focux.js",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./output/focux.esm.js",
-      "require": "./output/focux.js",
-      "types": "./index.d.ts"
+      "require": "./output/focux.js"
     }
   },
   "scripts": {
