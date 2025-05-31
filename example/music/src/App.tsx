@@ -2,10 +2,12 @@ import SideBar from "./components/side-bar";
 import ReviewSongs from "./components/review-songs";
 import MadeForU from "./components/made-for-u";
 import MusicChips from "./components/music-chips";
-import { use, useEffect, useRef } from "react";
+import { lazy, Suspense, use, useEffect, useRef, useState } from "react";
 import { FocusContext, type FocusContextType } from "./context";
 import focux from "focux";
 import { useDebouncedCallback } from "use-debounce";
+
+const LazyParallaxes = lazy(() => import("./components/parallaxes"));
 
 function App() {
 
@@ -20,8 +22,13 @@ function App() {
     // delay in ms
     66
   );
+  const [shouldLoadParallaxes, setSL] = useState(false);
 
   useEffect(() => {
+    if (window.innerWidth > 765) {
+      setSL(true);
+    }
+
     debouncedFocux();
 
     setTimeout(() => {
@@ -54,6 +61,9 @@ function App() {
           <MadeForU />
         </div>
       </div>
+      {shouldLoadParallaxes && <Suspense>
+        <LazyParallaxes />
+      </Suspense>}
     </div>
   );
 
@@ -76,6 +86,7 @@ function App() {
     const next = focuXMap.current.get(cur);
     if (next == null && ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
       curDir.current = dirMap.get(e.key) as string;
+      setCurDir(curDir.current || "");
       focuXMap.current.keys().next().value.focus();
     } else {
       if (next) {

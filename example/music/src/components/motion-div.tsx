@@ -24,12 +24,18 @@ export default function MDiv({ children, ...otherProps }: { children: ReactNode 
     });
   }
 
+  const handleMd = () => {
+    if (curDir?.current)
+      curDir.current = "";
+  }
+
   return <motion.div
     ref={e => {
       animeFocusHandlerRef?.current.set(e as HTMLDivElement, handleFocus);
     }}
     onClick={handleClick}
     onFocus={handleFocus}
+    onMouseDown={handleMd}
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     animate={controls} {...otherProps as any}>
     {children}
