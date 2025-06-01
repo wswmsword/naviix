@@ -1,6 +1,6 @@
 {
   "name": "naviix",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Spatial navigation. Arrow key navigation.",
   "main": "output/naviix.js",
   "exports": {
