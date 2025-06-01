@@ -1,30 +1,30 @@
-# focux
+# navix
 
 <a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" align="right"></a>
 
-focux 可以辅助实现键盘的方向键聚焦导航。输入元素的坐标和尺寸，focux 将输出每个元素的上、下、左、右方向上的相邻元素。
+navix 可以辅助实现键盘的方向键聚焦导航。输入元素的坐标和尺寸，navix 将输出每个元素的上、下、左、右方向上的相邻元素。
 
-> 查看具体的使用效果，请访问 focux 线上的🎵音乐主题范例：[focux music](https://wswmsword.github.io/examples/focux-music/)。
+> 查看具体的使用效果，请访问 navix 线上的🎵音乐主题范例：[navix music](https://wswmsword.github.io/examples/navix-music/)。
 
 
 ## 安装
 
-使用 npm 安装最新版本（yarn 则是 `yarn add focux`）：
+使用 npm 安装最新版本（yarn 则是 `yarn add navix`）：
 
 ```bash
-npm install focux
+npm install navix
 ```
 
 ## 使用
 
 格式：
 ```javascript
-const res = focux(squares);
+const res = navix(squares);
 ```
 
 范例：
 ```javascript
-import fx from "focux";
+import fx from "navix";
 const s1 = [1, 1, 1, 1];
 const s2 = [4, 1, 1, 1];
 const fxMap = fx([s1, s2]);
@@ -44,7 +44,7 @@ const s2Left = fxMap.get(s2).left;
 ]
 ```
 
-> 上面的简写形式是 `[[1, 1, 1, 1], [4, 1, 1, 1]]`，这样忽略 `id` 只剩坐标信息后，focux 会统一规范为上面有 `id` 的格式，其中 `id` 会被填充为简写形式中的坐标尺寸数组。
+> 上面的简写形式是 `[[1, 1, 1, 1], [4, 1, 1, 1]]`，这样忽略 `id` 只剩坐标信息后，navix 会统一规范为上面有 `id` 的格式，其中 `id` 会被填充为简写形式中的坐标尺寸数组。
 
 对象：
 ```json
@@ -60,7 +60,7 @@ const s2Left = fxMap.get(s2).left;
 }
 ```
 
-`loc` 是一个包含 4 个数字元素的数组，前两个数字表示矩形的中心坐标，后两个数字表示中心距离竖向与横向边框的距离。`id` 作为一个唯一值代表了各个矩形，可以是任何值，方便在返回值中找到某个元素，当忽略 `id` 时，focux 会主动将 `loc` 填充为 `id`。
+`loc` 是一个包含 4 个数字元素的数组，前两个数字表示矩形的中心坐标，后两个数字表示中心距离竖向与横向边框的距离。`id` 作为一个唯一值代表了各个矩形，可以是任何值，方便在返回值中找到某个元素，当忽略 `id` 时，navix 会主动将 `loc` 填充为 `id`。
 
 ### 返回值
 

@@ -9,7 +9,7 @@ export default function SideBar({ updateFocuxMap }: { updateFocuxMap: () => void
   // const { register, unregister } = useContext(FocusContext) || {};
   return <div className="w-2xs border-r h-full py-4 flex-col shrink-0 gap-4 hidden md:flex z-1">
     <div className="px-3 py-2">
-      <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">发现 <i>focu<span className="text-[#f3c210]">x</span></i></h2>
+      <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">发现 <i>navi<span className="text-[#f3c210]">x</span></i></h2>
       <div className="space-y-1">
         <SiderBtn><CirclePlay />开始听歌（支持键盘导航）</SiderBtn>
         <SiderBtn><Grip />随便看看（上下左右键导航）</SiderBtn>

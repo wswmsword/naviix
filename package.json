@@ -1,13 +1,13 @@
 {
-  "name": "focux",
+  "name": "navix",
   "version": "1.0.0",
-  "description": "Web focus follows the star.",
-  "main": "output/focux.js",
+  "description": "Spatial navigation. Arrow key navigation.",
+  "main": "output/navix.js",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "import": "./output/focux.esm.js",
-      "require": "./output/focux.js"
+      "import": "./output/navix.esm.js",
+      "require": "./output/navix.js"
     }
   },
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wswmsword/focux.git"
+    "url": "git+https://github.com/wswmsword/navix.git"
   },
   "keywords": [
     "a11y",
@@ -36,9 +36,9 @@
   "license": "MPL-2.0",
   "types": "./index.d.ts",
   "bugs": {
-    "url": "https://github.com/wswmsword/focux/issues"
+    "url": "https://github.com/wswmsword/navix/issues"
   },
-  "homepage": "https://github.com/wswmsword/focux#readme",
+  "homepage": "https://github.com/wswmsword/navix#readme",
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.26.9",

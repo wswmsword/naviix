@@ -22,7 +22,7 @@ export default function Parallaxes() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0 }}
         exit={{ opacity: 0, transition: { duration: 2 } }}>
-        <ParallaxText baseVelocity={-13} positive={isPositive} className="fixed top-[148px] w-full py-3 -z-1 bg-[#f3c210] text-black">Focux 由 wswmsword 强势驱动</ParallaxText></motion.div>}
+        <ParallaxText baseVelocity={-13} positive={isPositive} className="fixed top-[148px] w-full py-3 -z-1 bg-[#f3c210] text-black">Navix 由 wswmsword 强势驱动</ParallaxText></motion.div>}
   </AnimatePresence>
   <AnimatePresence>
     {["u", "d"].includes(fc.resCurDir) &&
@@ -32,7 +32,7 @@ export default function Parallaxes() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0 }}
         exit={{ opacity: 0, transition: { duration: 2 } }}>
-        <ParallaxText baseVelocity={19} dir="col" positive={isPositive} className="fixed top-1/2 md:-translate-x-[calc(50%-325px)] rotate-90 w-full py-3 -z-1 bg-[#f3c210] text-black">Focux ⬆️ ➡️ ⬇️ ⬅️</ParallaxText>
+        <ParallaxText baseVelocity={19} dir="col" positive={isPositive} className="fixed top-1/2 md:-translate-x-[calc(50%-325px)] rotate-90 w-full py-3 -z-1 bg-[#f3c210] text-black">Navix ⬆️ ➡️ ⬇️ ⬅️</ParallaxText>
       </motion.div>}
   </AnimatePresence></>;
 }

@@ -4,7 +4,7 @@ import MadeForU from "./components/made-for-u";
 import MusicChips from "./components/music-chips";
 import { lazy, Suspense, use, useEffect, useRef, useState } from "react";
 import { FocusContext, type FocusContextType } from "./context";
-import focux from "focux";
+import navix from "navix";
 import { useDebouncedCallback } from "use-debounce";
 
 const LazyParallaxes = lazy(() => import("./components/parallaxes"));
@@ -51,8 +51,8 @@ function App() {
 
   return (
     <div className="flex h-full relative overflow-hidden" ref={container}>
-      <div aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic pointer-events-none h z-0`}>Focux</div>
-      <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic hh z-0`}>Focux</h1>
+      <div aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic pointer-events-none h z-0`}>Navix</div>
+      <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic hh z-0`}>Navix</h1>
       <SideBar updateFocuxMap={debouncedFocux} />
       <div className="py-4 shrink min-w-0 grow overflow-y-auto z-1" onScroll={debouncedFocux}>
         <div className="max-w-[1188px] mx-auto">
@@ -132,8 +132,8 @@ function App() {
     //     locs: listLocs.slice(0, -1),
     //   }
     // };
-    // focuXMap.current = focux(config);
-    focuXMap.current = focux(locs);
+    // focuXMap.current = navix(config);
+    focuXMap.current = navix(locs);
   }
 }
 

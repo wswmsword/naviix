@@ -3,3 +3,8 @@ output/*
 node_modules
 coverage
 build
+
+!output/navix.umd.js
+!output/navix.umd.js.map
+!output/navix.umd.min.js
+!output/navix.umd.min.js.map

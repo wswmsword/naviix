@@ -1,5 +1,5 @@
 
-export default function focux(squares) {
+export default function navix(squares) {
   const formattedSquares = formatIpt(squares);
 
   const { x: rawX, firstInWrap } = getX(formattedSquares);

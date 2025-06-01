@@ -14,7 +14,7 @@ export default function GuideModal({ setK }: { setK: Dispatch<SetStateAction<boo
   const [openedGuide, setG] = useState(false);
 
   useEffect(() => {
-    const k = localStorage.getItem("focux:k");
+    const k = localStorage.getItem("navix:k");
     if (k == null) {
       setG(true);
     } else {
@@ -28,12 +28,12 @@ export default function GuideModal({ setK }: { setK: Dispatch<SetStateAction<boo
     <Dialog open={openedGuide} onOpenChange={(e) => setG(e)}>
       <DialogContent className="sm:max-w-[425px]" onKeyDown={handleArrowKey}>
         <DialogHeader>
-          <DialogTitle><SparklesText sparklesCount={4} className="text-2xl font-semibold tracking-tight"><i>Focu<span className="text-[#f3c210]">x</span></i> 使用指南</SparklesText></DialogTitle>
+          <DialogTitle><SparklesText sparklesCount={4} className="text-2xl font-semibold tracking-tight"><i>Navi<span className="text-[#f3c210]">x</span></i> 使用指南</SparklesText></DialogTitle>
           <DialogDescription>
-            Focux 是一个 JavaScript 空间导航库，给 focux 投喂元素们的坐标和尺寸后，focux 会告诉你每个元素的邻居是谁。
+            Navix 是一个 JavaScript 空间导航库，给 navix 投喂元素们的坐标和尺寸后，navix 会告诉你每个元素的邻居是谁。
           </DialogDescription>
           <DialogDescription>
-            这是一个音乐主题的 focux 范例页面，访问页面的时候，您可以通过键盘的上、下、左、右按键进行导航。
+            这是一个音乐主题的 navix 范例页面，访问页面的时候，您可以通过键盘的上、下、左、右按键进行导航。
           </DialogDescription>
           <DialogDescription>
             接下来，您可以按下键盘的方向键直接进入页面，或者选择虚拟键盘来模拟真实键盘体验。
@@ -42,14 +42,14 @@ export default function GuideModal({ setK }: { setK: Dispatch<SetStateAction<boo
         <DialogFooter>
           <Button onClick={() => {
             setG(false);
-            localStorage.setItem("focux:k", "false");
+            localStorage.setItem("navix:k", "false");
           }}>进入页面</Button>
           <Button onClick={() => {
             setTimeout(() => {
               setK(true);
             }, 200);
             setG(false);
-            localStorage.setItem("focux:k", "true");
+            localStorage.setItem("navix:k", "true");
           }}>🎹 虚拟键盘</Button>
         </DialogFooter>
       </DialogContent>
@@ -59,7 +59,7 @@ export default function GuideModal({ setK }: { setK: Dispatch<SetStateAction<boo
   function handleArrowKey(e: KeyboardEvent) {
     if (["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"].includes(e.key)) {
       setG(false);
-      localStorage.setItem("focux:k", "false");
+      localStorage.setItem("navix:k", "false");
     }
   }
 }

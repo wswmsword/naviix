@@ -11,7 +11,7 @@ import { toast } from "sonner"
 export default function ReviewSongs({ updateFocuxMap }: { updateFocuxMap: () => void }) {
   return <><div className="px-8 flex items-start gap-1 flex-col mt-5">
     <h2 className="text-2xl font-semibold tracking-tight">老歌重温</h2>
-    <p className="text-sm text-muted-foreground">唤起难忘的回忆，重温美好的时光。（<strong><i>focu<span className="text-[#f3c210]">x</span></i> 会找到元素的上、下、左、右方向的元素。</strong>）</p>
+    <p className="text-sm text-muted-foreground">唤起难忘的回忆，重温美好的时光。（<strong><i>navi<span className="text-[#f3c210]">x</span></i> 会找到元素的上、下、左、右方向的元素。</strong>）</p>
     <Separator className="mt-4" />
     </div>
     <div className="px-8 pt-4 pb-6 flex gap-4 overflow-x-auto w-full" onScroll={updateFocuxMap}>
