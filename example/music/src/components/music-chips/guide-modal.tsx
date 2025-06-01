@@ -28,7 +28,7 @@ export default function GuideModal({ setK }: { setK: Dispatch<SetStateAction<boo
     <Dialog open={openedGuide} onOpenChange={(e) => setG(e)}>
       <DialogContent className="sm:max-w-[425px]" onKeyDown={handleArrowKey}>
         <DialogHeader>
-          <DialogTitle><SparklesText sparklesCount={4} className="text-2xl font-semibold tracking-tight"><i>Navi<span className="text-[#f3c210]">x</span></i> 使用指南</SparklesText></DialogTitle>
+          <DialogTitle><SparklesText sparklesCount={4} className="text-2xl font-semibold tracking-tight"><i>Navii<span className="text-[#f3c210]">x</span></i> 使用指南</SparklesText></DialogTitle>
           <DialogDescription>
             Naviix 是一个 JavaScript 空间导航库，给 naviix 投喂元素们的坐标和尺寸后，naviix 会告诉你每个元素的邻居是谁。
           </DialogDescription>

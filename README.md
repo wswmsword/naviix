@@ -4,7 +4,7 @@
 
 naviix 可以辅助实现键盘的方向键聚焦导航。输入元素的坐标和尺寸，naviix 将输出每个元素的上、下、左、右方向上的相邻元素。
 
-> 查看具体的使用效果，请访问 naviix 线上的🎵音乐主题范例：[naviix music](https://wswmsword.github.io/examples/naviix-music/)。
+> 查看具体的使用效果，请访问 naviix 线上的🎵音乐主题范例：[naviix music](https://wswmsword.github.io/examples/navix-music/)。
 
 
 ## 安装
@@ -24,12 +24,12 @@ const res = naviix(squares);
 
 范例：
 ```javascript
-import fx from "naviix";
+import navix from "naviix";
 const s1 = [1, 1, 1, 1];
 const s2 = [4, 1, 1, 1];
-const fxMap = fx([s1, s2]);
-const s1Right = fxMap.get(s1).right;
-const s2Left = fxMap.get(s2).left;
+const nxMap = navix([s1, s2]);
+const s1Right = nxMap.get(s1).right;
+const s2Left = nxMap.get(s2).left;
 ```
 
 ### 参数

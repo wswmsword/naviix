@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite"
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/examples/naviix-music",
+  base: "/examples/navix-music",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
