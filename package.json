@@ -1,13 +1,13 @@
 {
-  "name": "navix",
+  "name": "naviix",
   "version": "1.0.0",
   "description": "Spatial navigation. Arrow key navigation.",
-  "main": "output/navix.js",
+  "main": "output/naviix.js",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "import": "./output/navix.esm.js",
-      "require": "./output/navix.js"
+      "import": "./output/naviix.esm.js",
+      "require": "./output/naviix.js"
     }
   },
   "scripts": {
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wswmsword/navix.git"
+    "url": "git+https://github.com/wswmsword/naviix.git"
   },
   "keywords": [
     "a11y",
@@ -36,9 +36,9 @@
   "license": "MPL-2.0",
   "types": "./index.d.ts",
   "bugs": {
-    "url": "https://github.com/wswmsword/navix/issues"
+    "url": "https://github.com/wswmsword/naviix/issues"
   },
-  "homepage": "https://github.com/wswmsword/navix#readme",
+  "homepage": "https://github.com/wswmsword/naviix#readme",
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.26.9",

@@ -1,4 +1,4 @@
-/* 这是 1.0.0 版本的 navix。 */
+/* 这是 1.0.0 版本的 naviix。 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -9,7 +9,7 @@
   })());
 })(this, (function () { 'use strict';
 
-  function navix(squares) {
+  function naviix(squares) {
     var formattedSquares = formatIpt(squares);
     var _getX = getX(formattedSquares),
       rawX = _getX.x,
@@ -406,7 +406,7 @@
     }
   }
 
-  return navix;
+  return naviix;
 
 }));
-//# sourceMappingURL=navix.umd.js.map
+//# sourceMappingURL=naviix.umd.js.map

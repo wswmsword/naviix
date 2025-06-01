@@ -1,7 +1,7 @@
 import assert from "node:assert";
-import navix from "./index.js";
+import naviix from "./index.js";
 
-describe("navix", function () {
+describe("naviix", function () {
   /**
    *  +---+  +---+
    *  |   |  |   |
@@ -11,7 +11,7 @@ describe("navix", function () {
     const s1 = [1, 1, 1, 1];
     const s2 = [4, 1, 1, 1];
     const squares = [s1, s2];
-    const res = navix(squares);
+    const res = naviix(squares);
     assert.equal(res.get(s1).right.id, s2);
     assert.equal(res.get(s2).left.id, s1);
     assert.equal(res.get(s1).left, undefined);
@@ -34,7 +34,7 @@ describe("navix", function () {
     const s1 = [1, 1, 1, 1];
     const s2 = [1, 4, 1, 1];
     const s3 = [4, 2.5, 1, 1.5];
-    const res = navix([s1, s2, s3]);
+    const res = naviix([s1, s2, s3]);
     assert.equal(res.get(s1).right.id, s3);
     assert.equal(res.get(s1).up.id, s2);
     assert.equal(res.get(s2).right.id, s3);
@@ -52,7 +52,7 @@ describe("navix", function () {
   it("重叠", function() {
     const s1 = [3, 3, 2, 2];
     const s2 = [5.5, 3, 1.5, 1];
-    const res = navix([s1, s2]);
+    const res = naviix([s1, s2]);
     assert.equal(res.get(s1).right.id, s2);
     assert.equal(res.get(s2).left.id, s1);
   });
@@ -68,7 +68,7 @@ describe("navix", function () {
   it("相离", function() {
     const s1 = [1, 1, 1, 1];
     const s2 = [4, 4, 1, 1];
-    const res = navix([s1, s2]);
+    const res = naviix([s1, s2]);
     const { left, right, up, down } = res.get(s1);
     const { left2, right2, up2, down2 } = res.get(s2);
     [left, right, up, down].forEach(d => assert.equal(d, undefined));
@@ -78,7 +78,7 @@ describe("navix", function () {
   it("相离二", function() {
     const s1 = [1, 1, 1, 1];
     const s2 = [4, 3.5, 1, 1];
-    const res = navix([s1, s2]);
+    const res = naviix([s1, s2]);
     const { left, right, up, down } = res.get(s1);
     const { left: l2, right: r2, up: u2, down: d2 } = res.get(s2);
     assert.equal(right.id, s2);
@@ -100,7 +100,7 @@ describe("navix", function () {
     const s2 = [2, 5, 1, 1];
     const s3 = [5, 2, 1, 1];
     const s4 = [5, 5, 1, 1];
-    const res = navix([s1, s2, s3, s4]);
+    const res = naviix([s1, s2, s3, s4]);
     const { left: l1, right: r1, up: u1, down: d1 } = res.get(s1);
     const { left: l2, right: r2, up: u2, down: d2 } = res.get(s2);
     const { left: l3, right: r3, up: u3, down: d3 } = res.get(s3);
@@ -132,7 +132,7 @@ describe("navix", function () {
     const s2 = [5, 1, 1, 1];
     const s3 = [5, 4, 1, 1];
     const w = [5, 3.5, 2, 3.5];
-    const res = navix({
+    const res = naviix({
       "locs": [s1],
       "subs": {
         "locs": [s2, s3],

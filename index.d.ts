@@ -20,8 +20,8 @@ type arySquares = Array<subLocs>;
 
 type directionLoc = baseObjLoc;
 
-declare function navix(squares: simpleSquares | objSquares | arySquares):
+declare function naviix(squares: simpleSquares | objSquares | arySquares):
   Map<any, { up?: directionLoc; down?: directionLoc; left?: directionLoc; right?: directionLoc }>;
 
-export = navix;
-export default navix;
+export = naviix;
+export default naviix;

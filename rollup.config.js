@@ -27,7 +27,7 @@ const cjs = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/navix.js",
+      file: "output/naviix.js",
       format: "cjs",
       ...commonOutput,
     },
@@ -36,7 +36,7 @@ const cjs = [
   {
     ...commonConfig,
     output: {
-      file: "output/navix.min.js",
+      file: "output/naviix.min.js",
       format: "cjs",
       ...commonOutput,
     },
@@ -49,7 +49,7 @@ const esm = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/navix.esm.js",
+      file: "output/naviix.esm.js",
       format: "esm",
       ...commonOutput,
     },
@@ -58,7 +58,7 @@ const esm = [
   {
     ...commonConfig,
     output: {
-      file: "output/navix.esm.min.js",
+      file: "output/naviix.esm.min.js",
       format: "esm",
       ...commonOutput,
     },
@@ -71,7 +71,7 @@ const umd = [
     ...commonConfig,
     external: [],
     output: {
-      file: "output/navix.umd.js",
+      file: "output/naviix.umd.js",
       format: "umd",
       noConflict: true,
       name: "scaleView",
@@ -83,7 +83,7 @@ const umd = [
   {
     ...commonConfig,
     output: {
-      file: "output/navix.umd.min.js",
+      file: "output/naviix.umd.min.js",
       format: "umd",
       noConflict: true,
       name: "scaleView",

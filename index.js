@@ -1,5 +1,5 @@
 
-export default function navix(squares) {
+export default function naviix(squares) {
   const formattedSquares = formatIpt(squares);
 
   const { x: rawX, firstInWrap } = getX(formattedSquares);

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
-    "navix": "file:../..",
+    "naviix": "file:../..",
     "framer-motion": "^12.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

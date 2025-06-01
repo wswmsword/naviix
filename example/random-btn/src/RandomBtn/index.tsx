@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, KeyboardEvent, useImperativeHandle } from "react";
-import navix from "navix";
+import naviix from "naviix";
 import styles from "./index.module.css";
 import { motion, useAnimation } from "framer-motion";
 
@@ -62,7 +62,7 @@ export default function RandomButtons({ maxCount }: RandomButtonsProps) {
       return { id: e, loc: [x + halfW, -y - halfH, halfW, halfH] as [number, number, number, number] };
     });
     if (squares.length === 0) return;
-    focuXMap.current = navix(squares);
+    focuXMap.current = naviix(squares);
   }, [buttons])
 
   useEffect(() => {
@@ -77,8 +77,8 @@ export default function RandomButtons({ maxCount }: RandomButtonsProps) {
       variants={containerVariants}
       initial="hidden"
       animate="visible" id="bg" className="relative w-full h-screen overflow-hidden" onKeyDown={nav} tabIndex={-1}>
-      <h1 aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic pointer-events-none ${styles.h}`}>Navix</h1>
-      <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic ${styles.hh}`}>Navix</h1>
+      <h1 aria-hidden className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic pointer-events-none ${styles.h}`}>Naviix</h1>
+      <h1 className={`absolute text-9xl font-bold text-[#1f2f4d] -bottom-6 right-3 italic ${styles.hh}`}>Naviix</h1>
       <p className="absolute text-8xl font-semibold text-[#1f2f4d]">请使用键盘的上、下、左、右键完成导航</p>
       {buttons.map((button, i) => <Btn key={i} bInfo={button} ref={e => { btnsRef.current[i] = e }} clickCb={generateButtons} curDir={curDir} animeRef={e => { btnsAnime.current.set(btnsRef.current[i], e) }} />)}
     </motion.div>
