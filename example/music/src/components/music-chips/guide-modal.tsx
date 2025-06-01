@@ -30,7 +30,7 @@ export default function GuideModal({ setK }: { setK: Dispatch<SetStateAction<boo
         <DialogHeader>
           <DialogTitle><SparklesText sparklesCount={4} className="text-2xl font-semibold tracking-tight"><i>Focu<span className="text-[#f3c210]">x</span></i> 使用指南</SparklesText></DialogTitle>
           <DialogDescription>
-            Focux 是一个 JavaScript 空间导航库，喂给 focux 元素们的坐标和尺寸后，focux 会告诉你每个元素的邻居是谁。
+            Focux 是一个 JavaScript 空间导航库，给 focux 投喂元素们的坐标和尺寸后，focux 会告诉你每个元素的邻居是谁。
           </DialogDescription>
           <DialogDescription>
             这是一个音乐主题的 focux 范例页面，访问页面的时候，您可以通过键盘的上、下、左、右按键进行导航。

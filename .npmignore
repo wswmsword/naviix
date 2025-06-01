@@ -1,0 +1,11 @@
+.gitignore
+.vscode
+npm-debug.log*
+node_modules
+index.spec.js
+package-lock.json
+example
+images
+index.js
+rollup.config.js
+babel.config.js

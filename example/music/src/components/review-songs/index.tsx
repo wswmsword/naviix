@@ -27,7 +27,7 @@ function CoverInfo({ title, artist, src }: { title: string, artist: string, src:
   const { register, unregister } = useContext(FocusContext) || {};
   return <div className="space-y-3 shrink-0 w-[150px] lg:w-[200px] xl:w-[250px]">
     <MDiv className="w-full h-[198px] lg:h-[264px] xl:h-[330px]"><button onClick={() => toast("点了 1 下")} className="rounded-md overflow-hidden w-full h-full" ref={ref}>
-      <img src={src} className="w-auto h-auto object-cover transition-all hover:scale-105 aspect-[3/4]" />
+      <img src={src} className="w-full h-full object-cover transition-all hover:scale-105 aspect-[3/4]" />
     </button></MDiv>
     <div className="space-y-1 text-sm">
       <MDiv className="text-[0px] w-full"><button ref={ref} className="text-sm font-medium leading-none w-full text-left truncate" onClick={() => toast("点了 1 下")}>{title}</button></MDiv>
