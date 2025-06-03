@@ -24,7 +24,7 @@ export default function MusicChips() {
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>专注</Button></MDiv>
     <MDiv><Button onClick={() => toast("点了 1 下")} variant="secondary" ref={ref}>睡眠</Button></MDiv>
     <MDiv><RainbowButton variant="outline" asChild ref={ref}><a href="https://github.com/wswmsword/naviix" target="_blank"><Pointer><span className="text-2xl relative -top-3 -left-3">⭐️</span></Pointer><Github />GitHub</a></RainbowButton></MDiv>
-    <MDiv><Button asChild ref={ref}><a href="https://wswmsword.github.io/examples/naviix-btns/" target="_blank">🎲 按钮试炼</a></Button></MDiv>
+    <MDiv><Button asChild ref={ref}><a href="https://wswmsword.github.io/examples/navix-btns/" target="_blank">🎲 按钮试炼</a></Button></MDiv>
     <ModeToggle />
     <DraggableModal opened={openedKey} />
     <GuideModal setK={setK} />

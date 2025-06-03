@@ -7,7 +7,7 @@ naviix 可以辅助实现键盘的方向键聚焦导航。输入元素的坐标�
 > 查看具体的使用效果，请访问 naviix 线上的🎵音乐主题范例：[naviix music](https://wswmsword.github.io/examples/navix-music/)。
 
 
-## 安装
+## 安装和使用
 
 使用 npm 安装最新版本（yarn 则是 `yarn add naviix`）：
 
@@ -15,26 +15,24 @@ naviix 可以辅助实现键盘的方向键聚焦导航。输入元素的坐标�
 npm install naviix
 ```
 
-## 使用
-
-格式：
+使用格式：
 ```javascript
-const res = naviix(squares);
+const res = naviix(rectangles);
 ```
 
-范例：
+具体范例：
 ```javascript
 import navix from "naviix";
-const s1 = [1, 1, 1, 1];
-const s2 = [4, 1, 1, 1];
-const nxMap = navix([s1, s2]);
-const s1Right = nxMap.get(s1).right;
-const s2Left = nxMap.get(s2).left;
+const r1 = [1, 1, 1, 1];
+const r2 = [4, 1, 1, 1];
+const nxMap = navix([r1, r2]);
+const r1Right = nxMap.get(r1).right;
+const r2Left = nxMap.get(r2).left;
 ```
 
 ### 参数
 
-- `squares`，数组或对象，当所有矩形在同一平面中时选择数组格式，当存在例如可滚动区域的子区时选择对象格式，下面是两种输入格式范例。
+- `rectangles`，数组或对象，当所有矩形在同一平面中时选择数组格式，当存在例如可滚动区域的子区时选择对象格式，下面是两种输入格式范例。
 
 数组：
 ```json
@@ -55,12 +53,14 @@ const s2Left = nxMap.get(s2).left;
       { "id": "s2", "loc": [5, 1, 1, 1] },
       { "id": "s3", "loc": [5, 4, 1, 1] }
     ],
-    "wrap": { "id": "w", "loc": [5, 3.5, 2, 3.5] },
+    "wrap": { "id": "w", "loc": [5, 3.5, 2, 3.5] }
   }
 }
 ```
 
-`loc` 是一个包含 4 个数字元素的数组，前两个数字表示矩形的中心坐标，后两个数字表示中心距离竖向与横向边框的距离。`id` 作为一个唯一值代表了各个矩形，可以是任何值，方便在返回值中找到某个元素，当忽略 `id` 时，naviix 会主动将 `loc` 填充为 `id`。
+- `loc` 是一个包含 4 个数字元素的数组，前两个数字表示矩形的中心坐标，后两个数字表示中心距离竖向与横向边框的距离；
+- `id` 作为一个唯一值代表了各个矩形，可以是任何值，方便在返回值中找到某个元素，当忽略 `id` 时，naviix 会主动将 `loc` 填充为 `id`；
+- 当包含 `subs` 子区时，`wrap` 是必须的，表示子区的包裹层的坐标尺寸信息。
 
 ### 返回值
 
@@ -75,28 +75,16 @@ npm install
 npm run test
 ```
 
-修改源码后，编写并执行单元测试，验证是否输出了预期的结果。
-
-一起开发，让程序的变量命名更合适、性能和功能更好。
-
-## CHANGELOG
-
-查看[更新日志](./CHANGELOG.md)。
-
-## 版本规则
-
-查看[语义化版本 2.0.0](https://semver.org/lang/zh-CN/)。
-
-## 协议
-
-查看 [MPL-2.0 License](./LICENSE)。
+一起开发，让程序的变量命名更合适、性能和功能更好。修改源码后，编写并执行单元测试，验证是否输出了预期的结果。
 
 ## 支持与赞助
 
-请随意 Issue、PR 和 Star，您也可以支付该项目，支付金额由您从该项目中获得的收益自行决定。
+点亮星星、提出问题、请求合并来推动这个项目！
 
 <details>
 <summary>展开查看用于微信支付和支付宝支付的二维码。</summary>
+
+您可以支付该项目，支付金额由您从该项目中获得的收益自行决定。
 
 <table>
   <tr align="center">
@@ -117,3 +105,7 @@ npm run test
 - [CSS Spatial Navigation Level 1](https://drafts.csswg.org/css-nav-1/)，W3C 空间导航草案
 - [WICG/spatial-navigation](https://github.com/WICG/spatial-navigation)，WICG GitHub 仓库，提供在线范例和空间导航 polyfill
 - [TV Spatial Navigation](https://engineering.atspotify.com/2023/05/tv-spatial-navigation)，Spotify 的空间导航介绍
+
+---
+
+[Demo](https://wswmsword.github.io/examples/navix-music/) • [更新日志](./CHANGELOG.md) • [语义化版本 2.0.0](https://semver.org/lang/zh-CN/) • [MPL-2.0 License](./LICENSE)
