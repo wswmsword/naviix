@@ -2,7 +2,7 @@
 
 <a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" align="right"></a>
 
-naviix 可以辅助实现键盘的方向键聚焦导航。输入元素的坐标和尺寸，naviix 将输出每个元素的上、下、左、右方向上的相邻元素。
+naviix 可以辅助实现键盘的空间导航（方向键聚焦导航）。输入元素的坐标和尺寸，输出每个元素的上、下、左、右方向上的相邻元素。
 
 > 查看具体的使用效果，请访问 naviix 线上的🎵音乐主题范例：[naviix music](https://wswmsword.github.io/examples/navix-music/)。
 
@@ -26,15 +26,15 @@ import navix from "naviix";
 const r1 = [1, 1, 1, 1];
 const r2 = [4, 1, 1, 1];
 const nxMap = navix([r1, r2]);
-const r1Right = nxMap.get(r1).right;
-const r2Left = nxMap.get(r2).left;
+const r1Right = nxMap.get(r1).right; // r1 的右方元素
+const r2Left = nxMap.get(r2).left; // r2 的左方元素
 ```
 
 ### 参数
 
-- `rectangles`，数组或对象，当所有矩形在同一平面中时选择数组格式，当存在例如可滚动区域的子区时选择对象格式，下面是两种输入格式范例。
+- `rectangles`，数组或对象，表示所有矩形的坐标尺寸信息，当所有矩形在同一平面中时选择数组格式，当存在例如可滚动区域的子区时选择对象格式。
 
-数组：
+数组格式范例：
 ```json
 [
   { "id": "s1", "loc": [1, 1, 1, 1] },
@@ -42,9 +42,16 @@ const r2Left = nxMap.get(r2).left;
 ]
 ```
 
-> 上面的简写形式是 `[[1, 1, 1, 1], [4, 1, 1, 1]]`，这样忽略 `id` 只剩坐标信息后，naviix 会统一规范为上面有 `id` 的格式，其中 `id` 会被填充为简写形式中的坐标尺寸数组。
+> 简写形式为 `[[1, 1, 1, 1], [4, 1, 1, 1]]`。
 
-对象：
+- `loc`，长度为 4 的数组，数组前两个数字表示矩形中心坐标，后两个数字表示中心距离竖边与横边的距离；
+- `id` 作为唯一值代表了某个矩形，可以是任何值，当忽略 `id` 时，naviix 会主动将 `loc` 填充为 `id`。
+
+<details>
+<summary>
+展开查看更长一些的对象格式范例。
+</summary>
+
 ```json
 {
   "locs": [{ "id": "s1", "loc": [1, 5, 1, 1] }],
@@ -58,15 +65,57 @@ const r2Left = nxMap.get(r2).left;
 }
 ```
 
-- `loc` 是一个包含 4 个数字元素的数组，前两个数字表示矩形的中心坐标，后两个数字表示中心距离竖向与横向边框的距离；
-- `id` 作为一个唯一值代表了各个矩形，可以是任何值，方便在返回值中找到某个元素，当忽略 `id` 时，naviix 会主动将 `loc` 填充为 `id`；
 - 当包含 `subs` 子区时，`wrap` 是必须的，表示子区的包裹层的坐标尺寸信息。
+
+> 对象格式中，同样支持简写形式。
+
+</details>
+
+
 
 ### 返回值
 
-返回值是一个 `Map`，`Map` 的键是输入参数中的 `id`，值是一个对象，对象包含了 `up`、`right`、`down`、`left` 四个属性，属性值为 `undefined` 表示该方向没有相邻矩形，否则值是一个形如 `{ id: "", loc: [] }` 的对象。
+返回值是一个 `Map`，`Map` 的键是输入参数中的 `id`，值是一个包含 `up/right/down/left` 四个属性的对象，属性值为 `undefined` 表示该方向没有相邻矩形，否则值是一个形如 `{ id: "", loc: [] }` 的对象。
 
-> 输入参数中，可以将 `id` 设置为 DOM 对象，方便在返回值中操作。例如 `resMap.get(btn).right?.id.focus()`。
+<details>
+<summary>
+输入参数中，可以将 id 设置为 DOM 对象，方便在返回值中操作。例如“resMap.get(btn).right?.id.focus()”。
+</summary>
+
+```javascript
+const r1 = document.getElementById("r1");
+const r2 = document.getElementById("r2");
+const nxMap = navix([{
+  id: r1,
+  loc: [1, 1, 1, 1]
+}, {
+  id: r2,
+  loc: [4, 1, 1, 1]
+}]);
+nxMap.get(r1).right.id.focus();
+```
+
+上面代码块中，返回值 `nxMap` 的结构如下：
+
+```
+Map(2) {
+  r1 => {
+    up: undefined,
+    right: { id: r2, loc: [4, 1, 1, 1] },
+    down: undefined,
+    left: undefined
+  },
+  r2 => {
+    up: undefined,
+    right: undefined,
+    down: undefined,
+    left: { id: r1, loc: [1, 1, 1, 1] }
+  }
+}
+```
+
+</details>
+
 
 ## 单元测试与参与开发
 
@@ -75,7 +124,7 @@ npm install
 npm run test
 ```
 
-一起开发，让程序的变量命名更合适、性能和功能更好。修改源码后，编写并执行单元测试，验证是否输出了预期的结果。
+一起开发，让程序的变量命名更合适、性能和功能更好。修改源码后，编写并执行相关[单元测试](./index.spec.js)，验证是否输出了预期的结果。
 
 ## 支持与赞助
 
@@ -99,7 +148,7 @@ npm run test
 
 </details>
 
-## 其它
+## 日志、版本规则、协议和其它
 
 相关链接：
 - [CSS Spatial Navigation Level 1](https://drafts.csswg.org/css-nav-1/)，W3C 空间导航草案
