@@ -23,8 +23,8 @@ const res = naviix(rectangles);
 具体范例：
 ```javascript
 import navix from "naviix";
-const r1 = [1, 1, 1, 1];
-const r2 = [4, 1, 1, 1];
+const r1 = [1, 1, 1, 1]; // 矩形 r1 的坐标尺寸
+const r2 = [4, 1, 1, 1]; // 矩形 r2
 const nxMap = navix([r1, r2]);
 const r1Right = nxMap.get(r1).right; // r1 的右方元素
 const r2Left = nxMap.get(r2).left; // r2 的左方元素
@@ -124,7 +124,7 @@ npm install
 npm run test
 ```
 
-一起开发，让程序的变量命名更合适、性能和功能更好。修改源码后，编写并执行相关[单元测试](./index.spec.js)，验证是否输出了预期的结果。
+参与开发，一起让程序的变量命名更合适、性能和功能更好。修改源码后，编写并执行相关[单元测试](./index.spec.js)，验证是否输出了预期的结果。项目中的原理文件（[how-it-works.md](./how-it-works.md)）也许能提供一定帮助。
 
 ## 支持与赞助
 
