@@ -2,10 +2,16 @@
 
 <a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg" alt="996.icu" align="right"></a>
 
-naviix 可以辅助实现键盘的空间导航（方向键聚焦导航）。输入元素的坐标和尺寸，输出每个元素的上、下、左、右方向上的相邻元素。
+naviix 可以辅助实现键盘的空间导航（方向键聚焦导航）。输入元素的坐标和尺寸，输出每个元素的上、下、左、右方向上的相邻元素。具体效果请访问一个线上🎵音乐主题范例：[naviix music](https://wswmsword.github.io/examples/navix-music/)。
 
-> 查看具体的使用效果，请访问 naviix 线上的🎵音乐主题范例：[naviix music](https://wswmsword.github.io/examples/navix-music/)。
+<details>
+<summary>浏览器中，可以打开“短暂地突出显示焦点对象”无障碍功能，来可视化观察键盘导航的过程。</summary>
 
+Chrome 中，在地址栏输入 `chrome://settings/accessibility`，或者在“设置 -> 无障碍”中，可以设置“短暂地突出显示焦点对象”。其它浏览器也许有类似的设定。
+
+![Chrome Outer Row](https://github.com/wswmsword/hanav/blob/main/images/chrome-outer-row.png)
+
+</details>
 
 ## 安装和使用
 
