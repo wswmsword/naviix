@@ -241,14 +241,15 @@ function formatIpt(input) {
   const simpleIpt = aryIpt &&
     (Array.isArray(input[0]) ?
       typeof input[0][0] === "number" :
-      input[0].loc != null);
+      (input[0].loc != null) || istanceofHtmlElement(input[0]));
   const objIpt = !aryIpt;
   const normalIpt = !simpleIpt && !objIpt;
 
   let formatted = null;
 
   if (simpleIpt) {
-    formatted = [{ locs: input.map((s) => Array.isArray(s) ? { id: s, loc: s } : s) }];
+    formatted = [{ locs: input.map((s) => Array.isArray(s) ?
+      { id: s, loc: s } : getElementObjLoc(s)) }];
   } else if (objIpt) {
     const { wrap, subs, locs } = input;
     formatted = [{ locs: formatIpt(locs)[0].locs }];
@@ -259,7 +260,7 @@ function formatIpt(input) {
     }
     if (wrap != null) {
       Object.assign(formatted[0], {
-        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : wrap
+        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : getElementObjLoc(wrap),
       });
     }
   } else if (normalIpt) {
@@ -267,7 +268,7 @@ function formatIpt(input) {
       const { locs, wrap, subs } = item;
       const res = {
         locs: formatIpt(locs)[0].locs,
-        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : wrap,
+        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : getElementObjLoc(wrap),
       };
       if (subs) {
         Object.assign(res, {
@@ -317,4 +318,32 @@ function genUserX(rawX, firstInWrap) {
 
     return userDir;
   }
+}
+
+function getElementObjLoc(o) {
+  if (istanceofHtmlElement(o))
+    return getElementObjLoc2(o);
+  if (istanceofHtmlElement(o.loc)) {
+    return {
+      ...o,
+      loc: getElementAryLoc(o.loc)
+    }
+  }
+  return o;
+}
+
+function getElementObjLoc2(e) {
+  return { id: e, loc: getElementAryLoc(e) };
+}
+
+function getElementAryLoc(e) {
+  const t = e.getBoundingClientRect();
+  const { x, y, width, height } = t;
+  const halfW = width / 2;
+  const halfH = height / 2;
+  return [x + halfW, -y - halfH, halfW, halfH];
+}
+
+function istanceofHtmlElement(o) {
+  return o instanceof HTMLElement;
 }

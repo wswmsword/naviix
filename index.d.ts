@@ -1,5 +1,5 @@
 
-type baseAryLoc = [number, number, number, number];
+type baseAryLoc = [number, number, number, number] | HTMLElement;
 type baseObjLoc = { id: any, loc: baseAryLoc };
 type loc = baseAryLoc | baseObjLoc;
 

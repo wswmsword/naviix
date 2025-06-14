@@ -67,14 +67,6 @@ function App() {
     </div>
   );
 
-  function mapLoc(e: HTMLElement) {
-    const t = (e as HTMLElement).getBoundingClientRect();
-    const { x, y, width, height } = t;
-    const halfW = width / 2;
-    const halfH = height / 2;
-    return { id: e, loc: [x + halfW, -y - halfH, halfW, halfH] as [number, number, number, number] };
-  }
-
   function nav(e: KeyboardEvent) {
     const cur = document.activeElement;
     const dirMap = new Map([
@@ -121,8 +113,8 @@ function App() {
   }
 
   function updateFocuxMap() {
-    const es = fc?.getFocusableElements();
-    const locs = (es || []).map(mapLoc).filter(item => item.loc[2] !== 0);
+    const es = fc?.getFocusableElements().filter(e => e.offsetWidth !== 0);
+    // const locs = (es || []).map(mapLoc).filter(item => item.loc[2] !== 0);
     // const listEs = fc?.groupElementsRef.current.get("list") || [];
     // const listLocs = listEs.map(mapLoc);
     // const config = {
@@ -133,7 +125,7 @@ function App() {
     //   }
     // };
     // focuXMap.current = naviix(config);
-    focuXMap.current = naviix(locs);
+    focuXMap.current = naviix(es);
   }
 }
 
