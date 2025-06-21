@@ -24,10 +24,10 @@ describe("naviix", function () {
 
   /**
    *  +---+
-   *  |   |  +---+
+   *  | 2 |  +---+
+   *  +---+  | 3 |
    *  +---+  |   |
-   *  +---+  |   |
-   *  |   |  +---+
+   *  | 1 |  +---+
    *  +---+
    */
   it("三个矩形", function() {
@@ -39,7 +39,7 @@ describe("naviix", function () {
     assert.equal(res.get(s1).up.id, s2);
     assert.equal(res.get(s2).right.id, s3);
     assert.equal(res.get(s2).down.id, s1);
-    assert.equal(res.get(s3).left.id, s1);
+    assert.equal(res.get(s3).left.id, s2);
   });
 
   /**
@@ -70,9 +70,9 @@ describe("naviix", function () {
     const s2 = [4, 4, 1, 1];
     const res = naviix([s1, s2]);
     const { left, right, up, down } = res.get(s1);
-    const { left2, right2, up2, down2 } = res.get(s2);
+    const { left: l2, right: r2, up: u2, down: d2 } = res.get(s2);
     [left, right, up, down].forEach(d => assert.equal(d, undefined));
-    [left2, right2, up2, down2].forEach(d => assert.equal(d, undefined));
+    [l2, r2, u2, d2].forEach(d => assert.equal(d, undefined));
   });
 
   it("相离二", function() {
@@ -151,6 +151,46 @@ describe("naviix", function () {
     assert.equal(d3.id, s2);
     assert.equal(l3.id, s1);
     [l1, u1, r2, d2, u3, r3, uw, rw, dw].forEach(d => assert.equal(d, undefined));
+  });
+
+  /**
+   *  +----------------------+
+   *  | +---+                |
+   *  | | 2 |    1           |
+   *  | +---+                |
+   *  +----------------------+
+   */
+
+  it("包含", function() {
+    const r1 = [4, 2, 4, 2];
+    const r2 = [2, 2, 1, 1];
+    const res = naviix([r1, r2]);
+    const { left, right, up, down } = res.get(r1);
+    const { left: l2, right: ri2, up: u2, down: d2 } = res.get(r2);
+    assert.equal(left.id, r2);
+    assert.equal(ri2.id, r1);
+    [right, up, down].forEach(d => assert.equal(d, undefined));
+    [l2, u2, d2].forEach(d => assert.equal(d, undefined));
+  });
+
+  /**
+   *  +---+
+   *  | 3 |
+   *  +---+
+   *  +---+
+   *  | 2 |
+   *  +---+
+   *  +---+
+   *  | 1 |
+   *  +---+
+   */
+  it("三个直线矩形", function() {
+    const r1 = [1, 1, 1, 1];
+    const r2 = [1, 4, 1, 1];
+    const r3 = [1, 7, 1, 1];
+    const res = naviix([r1, r2, r3]);
+    assert.equal(res.get(r1).up.id, r2);
+    assert.equal(res.get(r3).down.id, r2);
   });
 }); 
 

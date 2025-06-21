@@ -55,57 +55,65 @@ function getXBySimple(squares, wrap, subWraps) {
     let minDownDis = Infinity;
     let downS = wrap; // 默认指向包裹层
     let gotDown = false;
-    sortedY.slice(0, sOrderY).forEach(s2 => {
-      let dis = getMinDownDis(s.loc, s2.loc);
+    for (let i = sOrderY - 1; i > -1; -- i) { // 从距离元素最近的位置寻找
+      const s2 = sortedY[i];
+      const { dis, isProj } = getMinDownDis(s.loc, s2.loc);
 
       if (dis < minDownDis) {
         gotDown = true;
         downS = s2;
         minDownDis = dis;
+        if (isProj) break; // 投影距离是最短距离，无需后续比较
       }
-    });
+    }
 
     // next up element
     let minUpDis = Infinity;
     let upS = wrap;
     let gotUp = false;
-    sortedY.slice(sOrderY + 1).forEach(s2 => {
-      let dis = getMinUpDis(s.loc, s2.loc);
+    for (let i = sOrderY + 1; i < sortedY.length; ++ i) {
+      const s2 = sortedY[i];
+      const { dis, isProj } = getMinUpDis(s.loc, s2.loc);
 
       if (dis < minUpDis) {
         gotUp = true;
         upS = s2;
         minUpDis = dis;
+        if (isProj) break;
       }
-    });
+    }
 
     // next left element
     let minLDis = Infinity;
     let lS = wrap;
     let gotLeft = false;
-    sortedX.slice(0, sOrderX).forEach(s2 => {
-      let dis = getMinLeftDis(s.loc, s2.loc);
+    for (let i = sOrderX - 1; i > -1; -- i) {
+      const s2 = sortedX[i];
+      const { dis, isProj } = getMinLeftDis(s.loc, s2.loc);
 
       if (dis < minLDis) {
         gotLeft = true;
         lS = s2;
         minLDis = dis;
+        if (isProj) break;
       }
-    });
+    }
 
     // next right element
     let minRDis = Infinity;
     let rS = wrap;
     let gotRight = false;
-    sortedX.slice(sOrderX + 1).forEach(s2 => {
-      const dis = getMinRightDis(s.loc, s2.loc);
+    for (let i = sOrderX + 1; i < sortedX.length; ++ i) {
+      const s2 = sortedX[i];
+      const { dis, isProj } = getMinRightDis(s.loc, s2.loc);
 
       if (dis < minRDis) {
         gotRight = true;
         rS = s2;
         minRDis = dis;
+        if (isProj) break;
       }
-    });
+    }
 
     dirMap.set(s.id, {
       up: upS,
@@ -140,6 +148,7 @@ function getMinDownDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
+  let isProj = false;
   if (y > y2) { // is below
 
     if (x2 - t1a > x + t1) { // is right corner
@@ -154,18 +163,20 @@ function getMinDownDis(s, s2) {
         dis = getDistance(x + t1, y - t2, x2 + t1a, y2 + t2a);
       }
     } else { // is project
+      isProj = true;
       dis = Math.pow(y - t2 - y2 - t2a, 2);
       if (y2 + t2a > y - t2) dis = -dis;
     }
   }
 
-  return dis;
+  return { dis, isProj };
 }
 
 function getMinUpDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
+  let isProj = false;
   if (y < y2) { // is above
     if (x2 - t1a > x + t1) { // is right corner
       if (x2 - t1a - x - t1 < y2 - t2a - y - t2) {
@@ -178,15 +189,17 @@ function getMinUpDis(s, s2) {
     } else { // is project
       dis = Math.pow(y2 - t2a - y - t2, 2);
       if (y2 - t2a < y + t2) dis = -dis;
+      isProj = true;
     }
   }
-  return dis;
+  return { dis, isProj };
 }
 
 function getMinLeftDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
+  let isProj = false;
   if (x > x2) { // is left
     if (y2 - t2a > y + t2) { // is top corner
       if (y2 - t2a - y - t2 < x - t1 - x2 - t1a) { // closer x
@@ -199,15 +212,17 @@ function getMinLeftDis(s, s2) {
     } else { // is project
       dis = Math.pow(x - t1 - x2 - t1a, 2);
       if (x2 + t1a > x - t1) dis = -dis;
+      isProj = true;
     }
   }
-  return dis;
+  return { dis, isProj };
 }
 
 function getMinRightDis(s, s2) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
+  let isProj = false;
   if (x2 > x) { // is right
     if (y2 - t2a > y + t2) { // is top corner
       if (y2 - t2a - y - t2 < x2 - t1a - x - t1) { // closer x
@@ -221,10 +236,11 @@ function getMinRightDis(s, s2) {
       dis = Math.pow(x2 - t1a - x - t1, 2);
       if (x2 - t1a < x + t1) // overlap
         dis = -dis;
+      isProj = true;
     }
   }
 
-  return dis;
+  return { dis, isProj };
 }
 
 function getDistance(x1, y1, x2, y2) {
