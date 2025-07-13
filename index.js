@@ -13,274 +13,64 @@ export default function naviix(squares, config = {}) {
   function memoReturn(x) {
     const memoMap = new Map(); // { enter, exit: { up, down, left, right } }
     return {
-      left(id) {
-        const { wrapId, left, nextWrap: { left: nextLWrap }, nextSubWrap: { left: nextLSubWrap } } = x.get(id);
-        const memo = memoMap.get(id); // { enter, exit: { left: exitL } }
-        if (nextLWrap) { // exit
-          const exit = memo.exit.left || genUserDir("left", left, nextLWrap, nextLSubWrap, rawX, firstInWrap);
-          return exit;
-        } else if (nextLSubWrap) { // enter
-          const memo = memoMap.get(left.id);
-          return memo.enter;
-        } else {
-          const { left: lLeft, right: lRight, up: lUp, down: lDown,
-            nextSubWrap: {
-              left: lNextLSubWrap,
-              up: lNextUSubWrap,
-              right: lNextRSubWrap,
-              down: lNextDSubWrap,
-            }
-          } = x.get(left.id);
-          // 更新 exit
-          if (lNextLSubWrap) {
-            const memo = memoMap.get(lLeft.id);
-            memoMap.set(lLeft.id, {
+      left: (id) => getMemoizedDirX(id, "left"),
+      up: (id) => getMemoizedDirX(id, "up"),
+      right: (id) => getMemoizedDirX(id, "right"),
+      down: (id) => getMemoizedDirX(id, "down"),
+    };
+
+    /**
+     * @param {any} id 
+     * @param {string} dir 
+     * @returns 
+     */
+    function getMemoizedDirX(id, dir) {
+      const idXInfo = x.get(id);
+      const { wrapId } = idXInfo;
+      const dirX = idXInfo[dir];
+      const dirXIsWrap = idXInfo.nextWrap[dir];
+      const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
+      const memo = memoMap.get(id);
+      if (dirXIsWrap) { // exit
+        const exit = memo.exit[dir] || genUserDir(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
+        return exit;
+      } else if (dirXIsSubWrap) { // enter
+        const memo = memoMap.get(dirX.id);
+        return memo.enter;
+      } else {
+        const { left: nextL, right: nextR, up: nextU, down: nextD,
+          nextSubWrap: {
+            left: nextLIsSubWrap,
+            up: nextUIsSubWrap,
+            right: nextRIsSubWrap,
+            down: nextDIsSubWrap,
+          }
+        } = x.get(dirX.id);
+        // 更新 exit
+        updateSubExitMemo(nextLIsSubWrap, nextL);
+        updateSubExitMemo(nextUIsSubWrap, nextU);
+        updateSubExitMemo(nextRIsSubWrap, nextR);
+        updateSubExitMemo(nextDIsSubWrap, nextD);
+        // 更新 enter
+        memoMap.set(wrapId, {
+          ...memo,
+          enter: dirX,
+        });
+        return dirX;
+
+        function updateSubExitMemo(nextDirXIsSubWrap, nextDirX) {
+          if (nextDirXIsSubWrap) {
+            const memo = memoMap.get(nextDirX.id);
+            memoMap.set(nextDirX.id, {
               ...memo,
               exit: {
                 ...memo.exit,
-                right: left,
+                up: dirX,
               }
             });
           }
-          if (lNextUSubWrap) {
-            const memo = memoMap.get(lUp.id);
-            memoMap.set(lUp.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                down: left,
-              }
-            });
-          }
-          if (lNextRSubWrap) {
-            const memo = memoMap.get(lRight.id);
-            memoMap.set(lRight.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                left: left,
-              }
-            });
-          }
-          if (lNextDSubWrap) {
-            const memo = memoMap.get(lDown.id);
-            memoMap.set(lDown.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                up: left,
-              }
-            });
-          }
-          // 更新 enter
-          memoMap.set(wrapId, {
-            ...memo,
-            enter: left,
-          });
-          return left;
         }
-      },
-      up(id) {
-        const { wrapId, up, nextWrap: { up: nextUWrap }, nextSubWrap: { up: nextUSubWrap } } = x.get(id);
-        const memo = memoMap.get(id); // { enter, exit: { left: exitL } }
-        if (nextUWrap) { // exit
-          const exit = memo.exit.up || genUserDir("up", up, nextUWrap, nextUSubWrap, rawX, firstInWrap);
-          return exit;
-        } else if (nextUSubWrap) { // enter
-          const memo = memoMap.get(up.id);
-          return memo.enter;
-        } else {
-          const { left: nnLeft, right: nnRight, up: nnUp, down: nnDown,
-            nextSubWrap: {
-              left: nnnLSubWrap,
-              up: nnnUSubWrap,
-              right: nnnRSubWrap,
-              down: nnnDSubWrap,
-            }
-          } = x.get(up.id);
-          // 更新 exit
-          if (nnnLSubWrap) {
-            const memo = memoMap.get(nnLeft.id);
-            memoMap.set(nnLeft.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                right: up,
-              }
-            });
-          }
-          if (nnnUSubWrap) {
-            const memo = memoMap.get(nnUp.id);
-            memoMap.set(nnUp.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                down: up,
-              }
-            });
-          }
-          if (nnnRSubWrap) {
-            const memo = memoMap.get(nnRight.id);
-            memoMap.set(nnRight.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                left: up,
-              }
-            });
-          }
-          if (nnnDSubWrap) {
-            const memo = memoMap.get(nnDown.id);
-            memoMap.set(nnDown.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                up: up,
-              }
-            });
-          }
-          // 更新 enter
-          memoMap.set(wrapId, {
-            ...memo,
-            enter: up,
-          });
-          return up;
-        }
-      },
-      right(id) {
-        const { wrapId, right, nextWrap: { right: nextRWrap }, nextSubWrap: { right: nextRSubWrap } } = x.get(id);
-        const memo = memoMap.get(id); // { enter, exit: { left: exitL } }
-        if (nextRWrap) { // exit
-          const exit = memo.exit.right || genUserDir("right", right, nextRWrap, nextRSubWrap, rawX, firstInWrap);
-          return exit;
-        } else if (nextRSubWrap) { // enter
-          const memo = memoMap.get(right.id);
-          return memo.enter;
-        } else {
-          const { left: nnLeft, right: nnRight, up: nnUp, down: nnDown,
-            nextSubWrap: {
-              left: nnnLSubWrap,
-              up: nnnUSubWrap,
-              right: nnnRSubWrap,
-              down: nnnDSubWrap,
-            }
-          } = x.get(right.id);
-          // 更新 exit
-          if (nnnLSubWrap) {
-            const memo = memoMap.get(nnLeft.id);
-            memoMap.set(nnLeft.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                right: right,
-              }
-            });
-          }
-          if (nnnUSubWrap) {
-            const memo = memoMap.get(nnUp.id);
-            memoMap.set(nnUp.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                down: right,
-              }
-            });
-          }
-          if (nnnRSubWrap) {
-            const memo = memoMap.get(nnRight.id);
-            memoMap.set(nnRight.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                left: right,
-              }
-            });
-          }
-          if (nnnDSubWrap) {
-            const memo = memoMap.get(nnDown.id);
-            memoMap.set(nnDown.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                up: right,
-              }
-            });
-          }
-          // 更新 enter
-          memoMap.set(wrapId, {
-            ...memo,
-            enter: right,
-          });
-          return right;
-        }
-      },
-      down(id) {
-        const { wrapId, down, nextWrap: { down: nextDWrap }, nextSubWrap: { down: nextDSubWrap } } = x.get(id);
-        const memo = memoMap.get(id); // { enter, exit: { left: exitL } }
-        if (nextDWrap) { // exit
-          const exit = memo.exit.down || genUserDir("down", down, nextDWrap, nextDSubWrap, rawX, firstInWrap);
-          return exit;
-        } else if (nextDSubWrap) { // enter
-          const memo = memoMap.get(down.id);
-          return memo.enter;
-        } else {
-          const { left: nnLeft, right: nnRight, up: nnUp, down: nnDown,
-            nextSubWrap: {
-              left: nnnLSubWrap,
-              up: nnnUSubWrap,
-              right: nnnRSubWrap,
-              down: nnnDSubWrap,
-            }
-          } = x.get(down.id);
-          // 更新 exit
-          if (nnnLSubWrap) {
-            const memo = memoMap.get(nnLeft.id);
-            memoMap.set(nnLeft.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                right: down,
-              }
-            });
-          }
-          if (nnnUSubWrap) {
-            const memo = memoMap.get(nnUp.id);
-            memoMap.set(nnUp.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                down: down,
-              }
-            });
-          }
-          if (nnnRSubWrap) {
-            const memo = memoMap.get(nnRight.id);
-            memoMap.set(nnRight.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                left: down,
-              }
-            });
-          }
-          if (nnnDSubWrap) {
-            const memo = memoMap.get(nnDown.id);
-            memoMap.set(nnDown.id, {
-              ...memo,
-              exit: {
-                ...memo.exit,
-                up: down,
-              }
-            });
-          }
-          // 更新 enter
-          memoMap.set(wrapId, {
-            ...memo,
-            enter: down,
-          });
-          return down;
-        }
-      },
+      }
     }
   }
 }
