@@ -1,9 +1,9 @@
 
-export default function naviix(squares, config = {}) {
-  const { memo } = config;
-  const formattedSquares = formatIpt(squares);
+export default function naviix(rects, config = {}) {
+  const { memo, scroll, more } = config;
+  const formattedRects = formatIpt(rects);
 
-  const { x: rawX, firstInWrap } = getX(formattedSquares);
+  const { x: rawX, firstInWrap } = getX(formattedRects);
   if (memo) {
     return memoReturn(rawX);
   } else {
@@ -32,7 +32,7 @@ export default function naviix(squares, config = {}) {
       const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
       const memo = memoMap.get(id);
       if (dirXIsWrap) { // exit
-        const exit = memo.exit[dir] || genUserDir(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
+        const exit = memo.exit[dir] || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
         return exit;
       } else if (dirXIsSubWrap) { // enter
         const memo = memoMap.get(dirX.id);
@@ -75,20 +75,20 @@ export default function naviix(squares, config = {}) {
   }
 }
 
-function getX(squares, notRoot) {
+function getX(rects, notRoot) {
   let mergedX = new Map();
   let firstInWrap = new Map();
 
-  if (!notRoot && squares.length > 1) { // 位于 root，且区域数量大于 1
-    const wraps = squares.map(info => info.wrap);
-    squares.forEach(s => {
+  if (!notRoot && rects.length > 1) { // 位于 root，且区域数量大于 1
+    const wraps = rects.map(info => info.wrap);
+    rects.forEach(s => {
       firstInWrap.set(s.wrap.id, s.locs[0]);
     });
     const { x } = getXBySimple(wraps);
     mergedX = x;
   }
 
-  squares.forEach(({ locs, subs, wrap }) => {
+  rects.forEach(({ locs, subs, wrap }) => {
     const subWraps = (subs || []).map(s => s.wrap);
     (subs || []).map(s => {
       firstInWrap.set(s.wrap.id, s.locs[0]);
@@ -103,10 +103,10 @@ function getX(squares, notRoot) {
   return { x: mergedX, firstInWrap };
 }
 
-function getXBySimple(squares, wrap, subWraps) {
-  const sortedX = [...squares];
+function getXBySimple(rects, wrap, subWraps) {
+  const sortedX = [...rects];
   sortedX.sort((s1, s2) => s1.loc[0] - s2.loc[0]);
-  const sortedY = [...squares];
+  const sortedY = [...rects];
   sortedY.sort((s1, s2) => s1.loc[1] - s2.loc[1]);
   const dirMap = new Map();
   let t = -Infinity;
@@ -114,7 +114,7 @@ function getXBySimple(squares, wrap, subWraps) {
   let l = Infinity;
   let r = -Infinity;
 
-  squares.forEach(s => {
+  rects.forEach(s => {
     const [x, y, t1, t2] = s.loc;
     const sOrderY = sortedY.findIndex(e => e.id === s.id);
     const sOrderX = sortedX.findIndex(e => e.id === s.id);
@@ -334,7 +334,7 @@ function formatIpt(input) {
 
   if (simpleIpt) {
     formatted = [{ locs: input.map((s) => Array.isArray(s) ?
-      { id: s, loc: s } : getElementObjLoc(s)) }];
+      { id: s, loc: s } : getElementNObjLoc(s)) }];
   } else if (objIpt) {
     const { wrap, subs, locs } = input;
     formatted = [{ locs: formatIpt(locs)[0].locs }];
@@ -345,7 +345,7 @@ function formatIpt(input) {
     }
     if (wrap != null) {
       Object.assign(formatted[0], {
-        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : getElementObjLoc(wrap),
+        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : getElementNObjLoc(wrap),
       });
     }
   } else if (normalIpt) {
@@ -353,7 +353,7 @@ function formatIpt(input) {
       const { locs, wrap, subs } = item;
       const res = {
         locs: formatIpt(locs)[0].locs,
-        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : getElementObjLoc(wrap),
+        wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : getElementNObjLoc(wrap),
       };
       if (subs) {
         Object.assign(res, {
@@ -373,10 +373,10 @@ function genUserX(rawX, firstInWrap) {
     const { up: upWrap, right: rWrap, down: downWrap, left: lWrap } = nextWrap;
     const { up: upSubW, right: rSubW, down: dSubWrap, left: lSubW } = nextSubWrap;
 
-    const userUp = genUserDir("up", up, upWrap, upSubW, rawX, firstInWrap);
-    const userRight = genUserDir("right", right, rWrap, rSubW, rawX, firstInWrap);
-    const userDown = genUserDir("down", down, downWrap, dSubWrap, rawX, firstInWrap);
-    const userLeft = genUserDir("left", left, lWrap, lSubW, rawX, firstInWrap);
+    const userUp = genUserDirX("up", up, upWrap, upSubW, rawX, firstInWrap);
+    const userRight = genUserDirX("right", right, rWrap, rSubW, rawX, firstInWrap);
+    const userDown = genUserDirX("down", down, downWrap, dSubWrap, rawX, firstInWrap);
+    const userLeft = genUserDirX("left", left, lWrap, lSubW, rawX, firstInWrap);
 
     x.set(key, {
       up: userUp,
@@ -389,23 +389,23 @@ function genUserX(rawX, firstInWrap) {
   return x;
 }
 
-function genUserDir(dirStr, rawDir, wrap, subW, rawX, firstInWrap) {
-  let userDir = rawDir;
-  if (rawDir && wrap) { // 是否指向包裹层
-    const wrapTarget = rawX.get(rawDir.id);
+function genUserDirX(dirStr, rawDirX, wrap, subW, rawX, firstInWrap) {
+  let userDir = rawDirX;
+  if (rawDirX && wrap) { // 是否指向包裹层
+    const wrapTarget = rawX.get(rawDirX.id);
     const { nextSubWrap } = wrapTarget;
     userDir = wrapTarget[dirStr];
     if (nextSubWrap[dirStr]) {
       userDir = firstInWrap.get(wrapTarget[dirStr].id);
     }
   } else if (subW) { // 是否指向子包裹层
-    userDir = firstInWrap.get(rawDir.id);
+    userDir = firstInWrap.get(rawDirX.id);
   }
 
   return userDir;
 }
 
-function getElementObjLoc(o) {
+function getElementNObjLoc(o) {
   if (istanceofHtmlElement(o))
     return getElementObjLoc2(o);
   if (istanceofHtmlElement(o.loc)) {
