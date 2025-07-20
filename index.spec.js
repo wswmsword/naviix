@@ -192,5 +192,40 @@ describe("naviix", function () {
     assert.equal(res.get(r1).up.id, r2);
     assert.equal(res.get(r3).down.id, r2);
   });
+
+  /**
+   *        +-------+
+   *  +---+ | +---+ |
+   *  | 1 | | | 2 | |
+   *  +---+ | +---+ |
+   *        | +---+ |
+   *        +-| 3 |-+
+   *        . +---+ .
+   *        . +---+ .
+   *        . | 4 | .
+   *        . +---+ .
+   *        . . . . .
+   */
+  it("子区中视图外的矩形", function() {
+    const s1 = [1, 8, 1, 1];
+    const s2 = [5, 8, 1, 1];
+    const s3 = [5, 5, 1, 1];
+    const s4 = [5, 2, 1, 1];
+    const w = [5, 7.5, 2, 2.5];
+    const res = naviix({
+      "locs": [s1],
+      "subs": {
+        "locs": [s2, s3, s4],
+        "wrap": w,
+      }
+    });
+    const { left: l4, up: u4, right: r4, down: d4 } = res.get(s4);
+    const { left: lw, up: uw, right: rw, down: dw } = res.get(w);
+    assert.equal(l4.id, s1);
+    assert.equal(u4.id, s3);
+    assert.equal(r4, undefined);
+    assert.equal(d4, undefined);
+    assert.equal(lw.id, s1);
+  });
 }); 
 
