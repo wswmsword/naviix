@@ -1,13 +1,115 @@
 
 export default function naviix(rects, config = {}) {
-  const { memo, scroll, more } = config;
+  const { memo, scroll, more, dev } = config;
   const formattedRects = formatIpt(rects);
 
-  const { x: rawX, firstInWrap } = getX(formattedRects);
-  if (memo) {
+  const { x: rawX, firstInWrap, enterWrapX, exitWrapX } = getX(formattedRects);
+
+  if (scroll) {
+    return scrollReturn(rawX);
+  } else if (memo) {
     return memoReturn(rawX);
   } else {
     return genUserX(rawX, firstInWrap);
+  }
+
+  function scrollReturn(x) {
+    const antiDirObj = {
+      "left": "right",
+      "up": "down",
+      "right": "left",
+      "down": "up",
+    };
+    return {
+      scroll(id, newX) {
+        updateRawXByScroll(id, x, newX);
+      },
+      left: (id) => {
+        const dir = "left";
+        const antiDir = antiDirObj[dir];
+        const idXInfo = x.get(id);
+        const dirX = idXInfo[dir];
+        const dirXIsWrap = idXInfo.nextWrap[dir];
+        const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
+        if (dirXIsWrap) { // exit
+          // 找到所有父区内所有指向当前区（子区）左边框的矩形
+          const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
+          return getNextWrapX(allDirWrapX);
+        } else if (dirXIsSubWrap) { // enter
+          // 找到子区内所有指向子区右边框的矩形
+          const allDirWrapX = getAllEnterWrapX(dirX.id, antiDir);
+          return getNextWrapX(allDirWrapX);
+        } else return dirX;
+
+        function getNextWrapX(allDirWrapX) {
+          let res = null;
+          // next left element
+          let minLDis = Infinity;
+          for (let i = 0; i < allDirWrapX.length; ++ i) {
+            const r2 = x.get(allDirWrapX[i]).origin;
+            const { dis, isProj } = getMinLeftDis(idXInfo.origin.loc, r2.loc);
+
+            if (dis < minLDis) {
+              minLDis = dis;
+              res = r2;
+              if (isProj) break;
+            }
+          }
+          return res;
+        }
+
+        /**
+         *  +--------------+
+         *  |        +---+ |
+         *  |        |   | |
+         *  |        +---+ |
+         *  | +----------+ |
+         *  | |    +---+ | | +---+
+         *  | |    |   | | | | < |
+         *  | |    +---+ | | +---+
+         *  | |    +---+ | |
+         *  | |    |   | | |
+         *  | |    +---+ | |
+         *  | +----------+ |
+         *  +--------------+
+         */
+        function getAllEnterWrapX(wrapId, dir) {
+          const exitWrapIdX = exitWrapX.get(wrapId)[dir];
+          return t(exitWrapIdX, dir);
+        }
+
+        /**
+         *            +---------------+
+         *      +---+ |               |
+         *      |   | |               |
+         *      +---+ |               |
+         *  +-------+ |               |
+         *  | +---+ | | +---+         |
+         *  | |   | | | | < |         |
+         *  | +---+ | | +---+         |
+         *  | +---+ | |               |
+         *  | |   | | |               |
+         *  | +---+ | |               |
+         *  +-------+ |               |
+         *            +---------------+
+         */
+        function getAllExitWrapX(wrapId, dir) {
+          const enterWrapIdX = enterWrapX.get(wrapId)[dir];
+          return t(enterWrapIdX, dir);
+        }
+
+        function t(wrapX, dir) {
+          const tt = [];
+          wrapX.forEach(xId => {
+            const subExitWrapX = exitWrapX.get(xId)[dir];
+            if (subExitWrapX == null) tt.push(xId);
+            else tt.push(...t(subExitWrapX));
+          });
+
+          return tt;
+        }
+      }
+    };
   }
 
   function memoReturn(x) {
@@ -78,6 +180,8 @@ export default function naviix(rects, config = {}) {
 function getX(rects, notRoot) {
   let mergedX = new Map();
   let firstInWrap = new Map();
+  let enterWrapX = new Map();
+  let exitWrapX = new Map();
 
   if (!notRoot && rects.length > 1) { // 位于 root，且区域数量大于 1
     const wraps = rects.map(info => info.wrap);
@@ -95,12 +199,37 @@ function getX(rects, notRoot) {
     });
     const newLocs = locs.concat(subWraps);
     const { x } = getXBySimple(newLocs, wrap, subWraps);
-    const { x: subsX, firstInWrap: _firstInWrap } = getX(subs || [], true);
+    const { x: subsX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX } = getX(subs || [], true);
     mergedX = new Map(Array.from(mergedX).concat(Array.from(x)).concat(Array.from(subsX)));
     firstInWrap = new Map(Array.from(firstInWrap).concat(Array.from(_firstInWrap)));
+    enterWrapX = new Map(Array.from(_enterWrapX));
+    exitWrapX = new Map(Array.from(_exitWrapX));
   });
 
-  return { x: mergedX, firstInWrap };
+  for(const [xId, xInfo] of mergedX) {
+    const { nextWrap, nextSubWrap, wrapId } = xInfo;
+    for(const dir in nextWrap) {
+      if (nextWrap[dir]) {
+        const gotExitWrapX = exitWrapX.get(wrapId);
+        exitWrapX.set(wrapId, {
+          ...gotExitWrapX,
+          [dir]: ((gotExitWrapX && gotExitWrapX[dir]) || []).concat(xId),
+        });
+      }
+    }
+    for(const dir in nextSubWrap) {
+      if (nextSubWrap[dir]) {
+        const wrapId = xInfo[dir].id;
+        const gotEnterWrapX = enterWrapX.get(wrapId);
+        enterWrapX.set(wrapId, {
+          ...gotEnterWrapX,
+          [dir]: ((gotEnterWrapX && gotEnterWrapX[dir]) || []).concat(xId),
+        })
+      }
+    }
+  }
+
+  return { x: mergedX, firstInWrap, enterWrapX, exitWrapX };
 }
 
 function getXBySimple(rects, wrap, subWraps) {
@@ -200,7 +329,8 @@ function getXBySimple(rects, wrap, subWraps) {
         right: subWraps.includes(rS),
         left: subWraps.includes(lS),
       },
-      wrapId: wrap == null ? "root" : wrap.id
+      wrapId: wrap == null ? "root" : wrap.id,
+      origin: s,
     });
 
     // 更新边界
@@ -402,7 +532,9 @@ function genUserDirX(dirStr, rawDirX, wrap, subW, rawX, firstInWrap) {
     userDir = firstInWrap.get(rawDirX.id);
   }
 
-  return userDir;
+  if (userDir == null) return userDir;
+  const { e, ...cleanUsrDirX } = userDir;
+  return cleanUsrDirX;
 }
 
 function getElementNObjLoc(o) {
@@ -411,14 +543,15 @@ function getElementNObjLoc(o) {
   if (istanceofHtmlElement(o.loc)) {
     return {
       ...o,
-      loc: getElementAryLoc(o.loc)
+      loc: getElementAryLoc(o.loc),
+      e: o.loc
     }
   }
   return o;
 }
 
 function getElementObjLoc2(e) {
-  return { id: e, loc: getElementAryLoc(e) };
+  return { id: e, loc: getElementAryLoc(e), e };
 }
 
 function getElementAryLoc(e) {
@@ -431,4 +564,28 @@ function getElementAryLoc(e) {
 
 function istanceofHtmlElement(o) {
   return o instanceof HTMLElement;
+}
+
+/**
+ * 
+ * @param {any} id 
+ * @param {Map} rawX 
+ * @param {Array<{id: any, loc: number[]}>|Map} newX 
+ */
+function updateRawXByScroll(id, rawX, newX) {
+  const mapNewX = newX instanceof Map ? newX : newX.reduce((acc, { id, loc }) => acc.set(id, loc), new Map());
+  for (const [, val] of rawX) {
+    const { up, right, down, left } = val;
+    rep(up);
+    rep(right);
+    rep(down);
+    rep(left);
+  }
+
+  function rep(dirX) {
+    if (dirX) {
+      const newLoc = mapNewX.get(dirX.id)
+      if (newLoc) dirX.loc = newLoc;
+    }
+  }
 }
