@@ -31,6 +31,7 @@ export default function naviix(rects, config = {}) {
         const dirX = idXInfo[dir];
         const dirXIsWrap = idXInfo.nextWrap[dir];
         const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
+        const startLoc = idXInfo.origin.e == null ? idXInfo.origin.loc : getElementAryLoc(idXInfo.origin.e);
         if (dirXIsWrap) { // exit
           // 找到所有父区内所有指向当前区（子区）左边框的矩形
           const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
@@ -47,7 +48,8 @@ export default function naviix(rects, config = {}) {
           let minLDis = Infinity;
           for (let i = 0; i < allDirWrapX.length; ++ i) {
             const r2 = x.get(allDirWrapX[i]).origin;
-            const { dis, isProj } = getMinLeftDis(idXInfo.origin.loc, r2.loc);
+            const targetLoc = r2.e == null ? r2.loc : getElementAryLoc(r2.e);
+            const { dis, isProj } = getMinLeftDis(startLoc, targetLoc);
 
             if (dis < minLDis) {
               minLDis = dis;
