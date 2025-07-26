@@ -31,7 +31,7 @@ export default function naviix(rects, config = {}) {
         const dirX = idXInfo[dir];
         const dirXIsWrap = idXInfo.nextWrap[dir];
         const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
-        const startLoc = idXInfo.origin.e == null ? idXInfo.origin.loc : getElementAryLoc(idXInfo.origin.e);
+        const startLoc = calcLocIfE(idXInfo.origin);
         if (dirXIsWrap) { // exit
           // 找到所有父区内所有指向当前区（子区）左边框的矩形
           const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
@@ -47,8 +47,11 @@ export default function naviix(rects, config = {}) {
           // next left element
           let minLDis = Infinity;
           for (let i = 0; i < allDirWrapX.length; ++ i) {
-            const r2 = x.get(allDirWrapX[i]).origin;
-            const targetLoc = r2.e == null ? r2.loc : getElementAryLoc(r2.e);
+            const r2Info = x.get(allDirWrapX[i]);
+            const r2 = r2Info.origin;
+            const targetLoc = calcLocIfE(r2);
+            const r2WrapInfo = x.get(r2.wrapId);
+            if (!isVisualElement(targetLoc, calcLocIfE(r2WrapInfo.origin))) continue;
             const { dis, isProj } = getMinLeftDis(startLoc, targetLoc);
 
             if (dis < minLDis) {
@@ -109,6 +112,10 @@ export default function naviix(rects, config = {}) {
           });
 
           return tt;
+        }
+
+        function calcLocIfE(x) {
+          return x.e == null ? x.loc : getElementAryLoc(x.e);
         }
       }
     };
@@ -590,4 +597,10 @@ function updateRawXByScroll(id, rawX, newX) {
       if (newLoc) dirX.loc = newLoc;
     }
   }
+}
+
+function isVisualElement(e, wrap) {
+  const [x, y, a, b] = e;
+  const [x2, y2, a2, b2] = wrap;
+  return x + a <= x2 + a2 && y + b <= y2 + b2 && x - a >= x2 - a2 && y - b >= y2 - b2;
 }
