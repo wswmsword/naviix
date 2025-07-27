@@ -14,111 +14,108 @@ export default function naviix(rects, config = {}) {
   }
 
   function scrollReturn(x) {
-    const antiDirObj = {
-      "left": "right",
-      "up": "down",
-      "right": "left",
-      "down": "up",
-    };
     return {
-      scroll(id, newX) {
-        updateRawXByScroll(id, x, newX);
+      scroll(newX) {
+        updateRawXByScroll(x, newX);
       },
-      left: (id) => {
-        const dir = "left";
-        const antiDir = antiDirObj[dir];
-        const idXInfo = x.get(id);
-        const dirX = idXInfo[dir];
-        const dirXIsWrap = idXInfo.nextWrap[dir];
-        const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
-        const startLoc = calcLocIfE(idXInfo.origin);
-        if (dirXIsWrap) { // exit
-          // 找到所有父区内所有指向当前区（子区）左边框的矩形
-          const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
-          return getNextWrapX(allDirWrapX);
-        } else if (dirXIsSubWrap) { // enter
-          // 找到子区内所有指向子区右边框的矩形
-          const allDirWrapX = getAllEnterWrapX(dirX.id, antiDir);
-          return getNextWrapX(allDirWrapX);
-        } else return dirX;
-
-        function getNextWrapX(allDirWrapX) {
-          let res = null;
-          // next left element
-          let minLDis = Infinity;
-          for (let i = 0; i < allDirWrapX.length; ++ i) {
-            const r2Info = x.get(allDirWrapX[i]);
-            const r2 = r2Info.origin;
-            const targetLoc = calcLocIfE(r2);
-            const r2WrapInfo = x.get(r2.wrapId);
-            if (!isVisualElement(targetLoc, calcLocIfE(r2WrapInfo.origin))) continue;
-            const { dis, isProj } = getMinLeftDis(startLoc, targetLoc);
-
-            if (dis < minLDis) {
-              minLDis = dis;
-              res = r2;
-              if (isProj) break;
-            }
-          }
-          return res;
-        }
-
-        /**
-         *  +--------------+
-         *  |        +---+ |
-         *  |        |   | |
-         *  |        +---+ |
-         *  | +----------+ |
-         *  | |    +---+ | | +---+
-         *  | |    |   | | | | < |
-         *  | |    +---+ | | +---+
-         *  | |    +---+ | |
-         *  | |    |   | | |
-         *  | |    +---+ | |
-         *  | +----------+ |
-         *  +--------------+
-         */
-        function getAllEnterWrapX(wrapId, dir) {
-          const exitWrapIdX = exitWrapX.get(wrapId)[dir];
-          return t(exitWrapIdX, dir);
-        }
-
-        /**
-         *            +---------------+
-         *      +---+ |               |
-         *      |   | |               |
-         *      +---+ |               |
-         *  +-------+ |               |
-         *  | +---+ | | +---+         |
-         *  | |   | | | | < |         |
-         *  | +---+ | | +---+         |
-         *  | +---+ | |               |
-         *  | |   | | |               |
-         *  | +---+ | |               |
-         *  +-------+ |               |
-         *            +---------------+
-         */
-        function getAllExitWrapX(wrapId, dir) {
-          const enterWrapIdX = enterWrapX.get(wrapId)[dir];
-          return t(enterWrapIdX, dir);
-        }
-
-        function t(wrapX, dir) {
-          const tt = [];
-          wrapX.forEach(xId => {
-            const subExitWrapX = exitWrapX.get(xId)[dir];
-            if (subExitWrapX == null) tt.push(xId);
-            else tt.push(...t(subExitWrapX));
-          });
-
-          return tt;
-        }
-
-        function calcLocIfE(x) {
-          return x.e == null ? x.loc : getElementAryLoc(x.e);
-        }
-      }
+      left: id => getScrollDirX(id, "left", "right", getMinLeftDis),
+      up: id => getScrollDirX(id, "up", "down", getMinUpDis),
+      right: id => getScrollDirX(id, "right", "left", getMinRightDis),
+      down: id => getScrollDirX(id, "down", "up", getMinDownDis),
     };
+
+    function getScrollDirX(id, dir, antiDir, calcMinDis) {
+      const idXInfo = x.get(id);
+      const dirX = idXInfo[dir];
+      const dirXIsWrap = idXInfo.nextWrap[dir];
+      const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
+      const startLoc = calcLocIfE(idXInfo.origin);
+      if (dirXIsWrap) { // exit
+        // 找到所有父区内所有指向当前区（子区）左边框的矩形
+        const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
+        return getNextWrapX(allDirWrapX);
+      } else if (dirXIsSubWrap) { // enter
+        // 找到子区内所有指向子区右边框的矩形
+        const allDirWrapX = getAllEnterWrapX(dirX.id, antiDir);
+        return getNextWrapX(allDirWrapX);
+      } else return dirX;
+
+      function getNextWrapX(allDirWrapX) {
+        let res = null;
+        // next direction element
+        let minLDis = Infinity;
+        for (let i = 0; i < allDirWrapX.length; ++ i) {
+          const r2Info = x.get(allDirWrapX[i]);
+          const r2 = r2Info.origin;
+          const targetLoc = calcLocIfE(r2);
+          const r2WrapInfo = x.get(r2.wrapId);
+          if (!isVisualElement(targetLoc, calcLocIfE(r2WrapInfo.origin))) continue;
+          const { dis, isProj } = calcMinDis(startLoc, targetLoc);
+
+          if (dis < minLDis) {
+            minLDis = dis;
+            res = r2;
+            if (isProj) break;
+          }
+        }
+        return res;
+      }
+
+      /**
+       *  +--------------+
+       *  |        +---+ |
+       *  |        |   | |
+       *  |        +---+ |
+       *  | +----------+ |
+       *  | |    +---+ | | +---+
+       *  | |    |   | | | | < |
+       *  | |    +---+ | | +---+
+       *  | |    +---+ | |
+       *  | |    |   | | |
+       *  | |    +---+ | |
+       *  | +----------+ |
+       *  +--------------+
+       */
+      function getAllEnterWrapX(wrapId, dir) {
+        const exitWrapIdX = exitWrapX.get(wrapId)[dir];
+        return t(exitWrapIdX, dir);
+      }
+
+      /**
+       *            +---------------+
+       *      +---+ |               |
+       *      |   | |               |
+       *      +---+ |               |
+       *  +-------+ |               |
+       *  | +---+ | | +---+         |
+       *  | |   | | | | < |         |
+       *  | +---+ | | +---+         |
+       *  | +---+ | |               |
+       *  | |   | | |               |
+       *  | +---+ | |               |
+       *  +-------+ |               |
+       *            +---------------+
+       */
+      function getAllExitWrapX(wrapId, dir) {
+        const enterWrapIdX = enterWrapX.get(wrapId)[dir];
+        return t(enterWrapIdX, dir);
+      }
+
+      function t(wrapX, dir) {
+        const tt = [];
+        wrapX.forEach(xId => {
+          const subExitWrapX = exitWrapX.get(xId)[dir];
+          if (subExitWrapX == null) tt.push(xId);
+          else tt.push(...t(subExitWrapX));
+        });
+
+        return tt;
+      }
+
+      function calcLocIfE(x) {
+        return x.e == null ? x.loc : getElementAryLoc(x.e);
+      }
+    }
   }
 
   function memoReturn(x) {
@@ -581,7 +578,7 @@ function istanceofHtmlElement(o) {
  * @param {Map} rawX 
  * @param {Array<{id: any, loc: number[]}>|Map} newX 
  */
-function updateRawXByScroll(id, rawX, newX) {
+function updateRawXByScroll(rawX, newX) {
   const mapNewX = newX instanceof Map ? newX : newX.reduce((acc, { id, loc }) => acc.set(id, loc), new Map());
   for (const [, val] of rawX) {
     const { up, right, down, left } = val;
