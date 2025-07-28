@@ -121,10 +121,10 @@ export default function naviix(rects, config = {}) {
   function memoReturn(x) {
     const memoMap = new Map(); // { enter, exit: { up, down, left, right } }
     return {
-      left: (id) => getMemoizedDirX(id, "left"),
-      up: (id) => getMemoizedDirX(id, "up"),
-      right: (id) => getMemoizedDirX(id, "right"),
-      down: (id) => getMemoizedDirX(id, "down"),
+      left: (id) => getMemoizedDirX(id, "left", "right"),
+      up: (id) => getMemoizedDirX(id, "up", "down"),
+      right: (id) => getMemoizedDirX(id, "right", "left"),
+      down: (id) => getMemoizedDirX(id, "down", "up"),
     };
 
     /**
@@ -132,7 +132,7 @@ export default function naviix(rects, config = {}) {
      * @param {string} dir 
      * @returns 
      */
-    function getMemoizedDirX(id, dir) {
+    function getMemoizedDirX(id, dir, antiDir) {
       const idXInfo = x.get(id);
       const { wrapId } = idXInfo;
       const dirX = idXInfo[dir];
@@ -155,10 +155,10 @@ export default function naviix(rects, config = {}) {
           }
         } = x.get(dirX.id);
         // 更新 exit
-        updateSubExitMemo(nextLIsSubWrap, nextL);
-        updateSubExitMemo(nextUIsSubWrap, nextU);
-        updateSubExitMemo(nextRIsSubWrap, nextR);
-        updateSubExitMemo(nextDIsSubWrap, nextD);
+        updateSubExitMemo(nextLIsSubWrap, nextL, antiDir);
+        updateSubExitMemo(nextUIsSubWrap, nextU, antiDir);
+        updateSubExitMemo(nextRIsSubWrap, nextR, antiDir);
+        updateSubExitMemo(nextDIsSubWrap, nextD, antiDir);
         // 更新 enter
         memoMap.set(wrapId, {
           ...memo,
@@ -166,14 +166,14 @@ export default function naviix(rects, config = {}) {
         });
         return dirX;
 
-        function updateSubExitMemo(nextDirXIsSubWrap, nextDirX) {
+        function updateSubExitMemo(nextDirXIsSubWrap, nextDirX, dir) {
           if (nextDirXIsSubWrap) {
             const memo = memoMap.get(nextDirX.id);
             memoMap.set(nextDirX.id, {
               ...memo,
               exit: {
                 ...memo.exit,
-                up: dirX,
+                [dir]: dirX,
               }
             });
           }
