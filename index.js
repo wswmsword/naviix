@@ -2,8 +2,8 @@
 export default function naviix(rects, config = {}) {
   const { memo, scroll, more, dev } = config;
   const formattedRects = formatIpt(rects);
-
   const { x: rawX, firstInWrap, enterWrapX, exitWrapX } = getX(formattedRects);
+  const memoMap = new Map(); // { enter, exit: { up, down, left, right } }
 
   if (scroll) {
     return scrollReturn(rawX);
@@ -11,6 +11,51 @@ export default function naviix(rects, config = {}) {
     return memoReturn(rawX);
   } else {
     return genUserX(rawX, firstInWrap);
+  }
+
+  function update(wrapId, newRects) {
+
+    const newFormattedRects = formatIpt(newRects);
+    const { x: newRawX, newFirstInWrap, newEnterWrapX, newExitWrapX } = getX(newFormattedRects);
+    const { rectsIncludeWrap, i } = cleanByFormattedRects(formattedRects, false);
+    rectsIncludeWrap[i] = newFormattedRects[0];
+    mergeMap(rawX, newRawX);
+    mergeMap(firstInWrap, newFirstInWrap);
+    mergeMap(enterWrapX, newEnterWrapX);
+    mergeMap(exitWrapX, newExitWrapX);
+
+    function cleanByFormattedRects(rects, found) {
+
+      if (rects == null) return;
+
+      for (let i = 0; i < rects.length; ++ i) {
+        const _rects = rects[i];
+        const { locs, subs, wrap = {} } = _rects;
+        const curWrapId = wrap.id;
+        const foundTargetWrap = wrapId === curWrapId;
+        const _found = found || foundTargetWrap;
+        if (_found) {
+          locs.forEach(({ id }) => rawX.delete(id));
+          firstInWrap.delete(curWrapId);
+          exitWrapX.delete(curWrapId);
+          if (found) {
+            rawX.delete(curWrapId);
+            enterWrapX.delete(curWrapId);
+            memoMap.delete(curWrapId);
+          } else {
+            delete memoMap.get(curWrapId).enter;
+          }
+        }
+        const res = cleanByFormattedRects(subs, _found);
+
+        if (res) return res;
+        if (foundTargetWrap) return { rectsIncludeWrap: rects, i };
+      }
+    }
+  }
+
+  function more() {
+    
   }
 
   function scrollReturn(x) {
@@ -22,6 +67,7 @@ export default function naviix(rects, config = {}) {
       up: id => getScrollDirX(id, "up", "down", getMinUpDis),
       right: id => getScrollDirX(id, "right", "left", getMinRightDis),
       down: id => getScrollDirX(id, "down", "up", getMinDownDis),
+      update,
     };
 
     function getScrollDirX(id, dir, antiDir, calcMinDis) {
@@ -119,12 +165,12 @@ export default function naviix(rects, config = {}) {
   }
 
   function memoReturn(x) {
-    const memoMap = new Map(); // { enter, exit: { up, down, left, right } }
     return {
       left: (id) => getMemoizedDirX(id, "left", "right"),
       up: (id) => getMemoizedDirX(id, "up", "down"),
       right: (id) => getMemoizedDirX(id, "right", "left"),
       down: (id) => getMemoizedDirX(id, "down", "up"),
+      update,
     };
 
     /**
@@ -186,7 +232,9 @@ export default function naviix(rects, config = {}) {
 function getX(rects, notRoot) {
   let mergedX = new Map();
   let firstInWrap = new Map();
+  /** 从外部进入 */
   let enterWrapX = new Map();
+  /** 从内部退出 */
   let exitWrapX = new Map();
 
   if (!notRoot && rects.length > 1) { // 位于 root，且区域数量大于 1
@@ -214,7 +262,7 @@ function getX(rects, notRoot) {
 
   for(const [xId, xInfo] of mergedX) {
     const { nextWrap, nextSubWrap, wrapId } = xInfo;
-    for(const dir in nextWrap) {
+    for(const dir of ["up", "right", "down", "left"]) {
       if (nextWrap[dir]) {
         const gotExitWrapX = exitWrapX.get(wrapId);
         exitWrapX.set(wrapId, {
@@ -222,8 +270,6 @@ function getX(rects, notRoot) {
           [dir]: ((gotExitWrapX && gotExitWrapX[dir]) || []).concat(xId),
         });
       }
-    }
-    for(const dir in nextSubWrap) {
       if (nextSubWrap[dir]) {
         const wrapId = xInfo[dir].id;
         const gotEnterWrapX = enterWrapX.get(wrapId);
@@ -600,4 +646,10 @@ function isVisualElement(e, wrap) {
   const [x, y, a, b] = e;
   const [x2, y2, a2, b2] = wrap;
   return x + a <= x2 + a2 && y + b <= y2 + b2 && x - a >= x2 - a2 && y - b >= y2 - b2;
+}
+
+function mergeMap(a, b) {
+  for (const [key, val] of b) {
+    a.set(key, val);
+  }
 }
