@@ -143,8 +143,8 @@ export default function naviix(rects, config = {}) {
         const exit = memo.exit[dir] || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
         return exit;
       } else if (dirXIsSubWrap) { // enter
-        const memo = memoMap.get(dirX.id);
-        return memo.enter;
+        const memo = memoMap.get(dirX.id) || {};
+        return memo.enter || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
       } else {
         const { left: nextL, right: nextR, up: nextU, down: nextD,
           nextSubWrap: {
