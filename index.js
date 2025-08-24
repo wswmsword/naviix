@@ -1,8 +1,10 @@
 
+const dirs = ["up", "right", "down", "left"];
+
 export default function naviix(rects, config = {}) {
-  const { memo, scroll, more, dev } = config;
+  const { memo, scroll, dev } = config;
   const formattedRects = formatIpt(rects);
-  const { x: rawX, firstInWrap, enterWrapX, exitWrapX } = getX(formattedRects);
+  const { x: rawX, firstInWrap, enterWrapX, exitWrapX, edgeX } = getX(formattedRects);
   const memoMap = new Map(); // { enter, exit: { up, down, left, right } }
 
   if (scroll) {
@@ -16,13 +18,14 @@ export default function naviix(rects, config = {}) {
   function update(wrapId, newRects) {
 
     const newFormattedRects = formatIpt(newRects);
-    const { x: newRawX, newFirstInWrap, newEnterWrapX, newExitWrapX } = getX(newFormattedRects);
+    const { x: newRawX, firstInWrap: newFirstInWrap, enterWrapX: newEnterWrapX, exitWrapX: newExitWrapX, edgeX: newEdgeX } = getX(newFormattedRects);
     const { rectsIncludeWrap, i } = cleanByFormattedRects(formattedRects, false);
     rectsIncludeWrap[i] = newFormattedRects[0];
     mergeMap(rawX, newRawX);
     mergeMap(firstInWrap, newFirstInWrap);
     mergeMap(enterWrapX, newEnterWrapX);
     mergeMap(exitWrapX, newExitWrapX);
+    mergeMap(edgeX, newEdgeX);
 
     function cleanByFormattedRects(rects, found) {
 
@@ -38,6 +41,7 @@ export default function naviix(rects, config = {}) {
           locs.forEach(({ id }) => rawX.delete(id));
           firstInWrap.delete(curWrapId);
           exitWrapX.delete(curWrapId);
+          edgeX.delete(curWrapId);
           if (found) {
             rawX.delete(curWrapId);
             enterWrapX.delete(curWrapId);
@@ -54,8 +58,46 @@ export default function naviix(rects, config = {}) {
     }
   }
 
-  function more() {
-    
+  function more(wrapId, newRects, dir) {
+    const edgeXOfWrap = edgeX.get(wrapId);
+    const edgeXRects = edgeXOfWrap.map(eId => rawX.get(eId).origin);
+    const formattedRects = formatIpt(newRects);
+    Array.prototype.push.apply(formattedRects[0].locs, edgeXRects); // 暂不支持 subs
+    const { x: _rawX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(formattedRects);
+
+    // combine rawX
+    edgeXOfWrap.forEach(xId => {
+      const originRawX = rawX.get(xId);
+      const moreRawX = _rawX.get(xId);
+      dirs.forEach(dir => {
+        if (moreRawX.dis[dir] < originRawX.dis[dir]) {
+          originRawX[dir] = moreRawX[dir];
+          originRawX.nextWrap[dir] = false;
+          originRawX.nextSubWrap[dir] = false;
+          originRawX.dis[dir] = moreRawX.dis[dir];
+        }
+      });
+    });
+
+    // combine firstInWrap
+    mergeMap(firstInWrap, _firstInWrap);
+    // combine enterWrapX
+    mergeMap(enterWrapX, _enterWrapX);
+    // combine exitWrapX
+    for (const [key, val] of _exitWrapX) {
+      if (key === wrapId) {
+        const originExitWrapX = exitWrapX.get(key);
+        for (dir of dirs) {
+          Array.prototype.push.apply(originExitWrapX[dir], val[dir]);
+        }
+      } else {
+        exitWrapX.set(key, val);
+      }
+    }
+    // combine edgeX
+    mergeMap(edgeX, _edgeX);
+    // replace edgeX
+    edgeX.set(wrapId, edgeX.get(wrapId).filter(xs => !edgeXOfWrap.includes(xs)));
   }
 
   function scrollReturn(x) {
@@ -68,6 +110,7 @@ export default function naviix(rects, config = {}) {
       right: id => getScrollDirX(id, "right", "left", getMinRightDis),
       down: id => getScrollDirX(id, "down", "up", getMinDownDis),
       update,
+      more,
     };
 
     function getScrollDirX(id, dir, antiDir, calcMinDis) {
@@ -171,6 +214,7 @@ export default function naviix(rects, config = {}) {
       right: (id) => getMemoizedDirX(id, "right", "left"),
       down: (id) => getMemoizedDirX(id, "down", "up"),
       update,
+      more,
     };
 
     /**
@@ -236,6 +280,8 @@ function getX(rects, notRoot) {
   let enterWrapX = new Map();
   /** 从内部退出 */
   let exitWrapX = new Map();
+  /** 边缘元素，没有被投影包围的元素 */
+  let edgeX = new Map();
 
   if (!notRoot && rects.length > 1) { // 位于 root，且区域数量大于 1
     const wraps = rects.map(info => info.wrap);
@@ -253,16 +299,17 @@ function getX(rects, notRoot) {
     });
     const newLocs = locs.concat(subWraps);
     const { x } = getXBySimple(newLocs, wrap, subWraps);
-    const { x: subsX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX } = getX(subs || [], true);
+    const { x: subsX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(subs || [], true);
     mergedX = new Map(Array.from(mergedX).concat(Array.from(x)).concat(Array.from(subsX)));
     firstInWrap = new Map(Array.from(firstInWrap).concat(Array.from(_firstInWrap)));
     enterWrapX = new Map(Array.from(_enterWrapX));
     exitWrapX = new Map(Array.from(_exitWrapX));
+    edgeX = new Map(Array.from((_edgeX)));
   });
 
   for(const [xId, xInfo] of mergedX) {
-    const { nextWrap, nextSubWrap, wrapId } = xInfo;
-    for(const dir of ["up", "right", "down", "left"]) {
+    const { nextWrap, nextSubWrap, wrapId, surrounded } = xInfo;
+    for(const dir of dirs) {
       if (nextWrap[dir]) {
         const gotExitWrapX = exitWrapX.get(wrapId);
         exitWrapX.set(wrapId, {
@@ -279,9 +326,12 @@ function getX(rects, notRoot) {
         })
       }
     }
+    if (!surrounded) {
+      edgeX.set(wrapId, (edgeX.get(wrapId) || []).concat(xId));
+    }
   }
 
-  return { x: mergedX, firstInWrap, enterWrapX, exitWrapX };
+  return { x: mergedX, firstInWrap, enterWrapX, exitWrapX, edgeX };
 }
 
 function getXBySimple(rects, wrap, subWraps) {
@@ -294,6 +344,7 @@ function getXBySimple(rects, wrap, subWraps) {
   let b = Infinity;
   let l = Infinity;
   let r = -Infinity;
+  let surroundedI = 0;
 
   rects.forEach(s => {
     const [x, y, t1, t2] = s.loc;
@@ -312,6 +363,7 @@ function getXBySimple(rects, wrap, subWraps) {
         gotDown = true;
         downS = s2;
         minDownDis = dis;
+        surroundedI += isProj;
         if (isProj) break; // 投影距离是最短距离，无需后续比较
       }
     }
@@ -328,6 +380,7 @@ function getXBySimple(rects, wrap, subWraps) {
         gotUp = true;
         upS = s2;
         minUpDis = dis;
+        surroundedI += isProj;
         if (isProj) break;
       }
     }
@@ -344,6 +397,7 @@ function getXBySimple(rects, wrap, subWraps) {
         gotLeft = true;
         lS = s2;
         minLDis = dis;
+        surroundedI += isProj;
         if (isProj) break;
       }
     }
@@ -360,6 +414,7 @@ function getXBySimple(rects, wrap, subWraps) {
         gotRight = true;
         rS = s2;
         minRDis = dis;
+        surroundedI += isProj;
         if (isProj) break;
       }
     }
@@ -383,6 +438,13 @@ function getXBySimple(rects, wrap, subWraps) {
       },
       wrapId: wrap == null ? "root" : wrap.id,
       origin: s,
+      surrounded: surroundedI === 4,
+      dis: {
+        up: minRDis,
+        down: minDownDis,
+        right: minRDis,
+        left: minLDis,
+      }
     });
 
     // 更新边界
