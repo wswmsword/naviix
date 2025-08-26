@@ -289,6 +289,7 @@ function getX(rects, notRoot) {
       firstInWrap.set(s.wrap.id, s.locs[0]);
     });
     const { x } = getXBySimple(wraps);
+    improveHelperDataByX(x);
     mergedX = x;
   }
 
@@ -299,39 +300,42 @@ function getX(rects, notRoot) {
     });
     const newLocs = locs.concat(subWraps);
     const { x } = getXBySimple(newLocs, wrap, subWraps);
+    improveHelperDataByX(x);
     const { x: subsX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(subs || [], true);
     mergedX = new Map(Array.from(mergedX).concat(Array.from(x)).concat(Array.from(subsX)));
     firstInWrap = new Map(Array.from(firstInWrap).concat(Array.from(_firstInWrap)));
-    enterWrapX = new Map(Array.from(_enterWrapX));
-    exitWrapX = new Map(Array.from(_exitWrapX));
-    edgeX = new Map(Array.from((_edgeX)));
+    enterWrapX = new Map(Array.from(enterWrapX).concat(Array.from(_enterWrapX)));
+    exitWrapX = new Map(Array.from(exitWrapX).concat(Array.from(_exitWrapX)));
+    edgeX = new Map(Array.from(edgeX).concat(Array.from(_edgeX)));
   });
 
-  for(const [xId, xInfo] of mergedX) {
-    const { nextWrap, nextSubWrap, wrapId, surrounded } = xInfo;
-    for(const dir of dirs) {
-      if (nextWrap[dir]) {
-        const gotExitWrapX = exitWrapX.get(wrapId);
-        exitWrapX.set(wrapId, {
-          ...gotExitWrapX,
-          [dir]: ((gotExitWrapX && gotExitWrapX[dir]) || []).concat(xId),
-        });
+  return { x: mergedX, firstInWrap, enterWrapX, exitWrapX, edgeX };
+
+  function improveHelperDataByX(x) {
+    for(const [xId, xInfo] of x) {
+      const { nextWrap, nextSubWrap, wrapId, surrounded } = xInfo;
+      for(const dir of dirs) {
+        if (nextWrap[dir]) {
+          const gotExitWrapX = exitWrapX.get(wrapId);
+          exitWrapX.set(wrapId, {
+            ...gotExitWrapX,
+            [dir]: ((gotExitWrapX && gotExitWrapX[dir]) || []).concat(xId),
+          });
+        }
+        if (nextSubWrap[dir]) {
+          const wrapId = xInfo[dir].id;
+          const gotEnterWrapX = enterWrapX.get(wrapId);
+          enterWrapX.set(wrapId, {
+            ...gotEnterWrapX,
+            [dir]: ((gotEnterWrapX && gotEnterWrapX[dir]) || []).concat(xId),
+          })
+        }
       }
-      if (nextSubWrap[dir]) {
-        const wrapId = xInfo[dir].id;
-        const gotEnterWrapX = enterWrapX.get(wrapId);
-        enterWrapX.set(wrapId, {
-          ...gotEnterWrapX,
-          [dir]: ((gotEnterWrapX && gotEnterWrapX[dir]) || []).concat(xId),
-        })
+      if (!surrounded) {
+        edgeX.set(wrapId, (edgeX.get(wrapId) || []).concat(xId));
       }
-    }
-    if (!surrounded) {
-      edgeX.set(wrapId, (edgeX.get(wrapId) || []).concat(xId));
     }
   }
-
-  return { x: mergedX, firstInWrap, enterWrapX, exitWrapX, edgeX };
 }
 
 function getXBySimple(rects, wrap, subWraps) {
