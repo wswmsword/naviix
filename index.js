@@ -58,7 +58,7 @@ export default function naviix(rects, config = {}) {
     }
   }
 
-  function more(wrapId, newRects, dir) {
+  function more(wrapId, newRects) {
     const edgeXOfWrap = edgeX.get(wrapId);
     const edgeXRects = edgeXOfWrap.map(eId => rawX.get(eId).origin);
     const formattedRects = formatIpt(newRects);
@@ -87,7 +87,7 @@ export default function naviix(rects, config = {}) {
     for (const [key, val] of _exitWrapX) {
       if (key === wrapId) {
         const originExitWrapX = exitWrapX.get(key);
-        for (dir of dirs) {
+        for (const dir of dirs) {
           Array.prototype.push.apply(originExitWrapX[dir], val[dir]);
         }
       } else {
@@ -96,7 +96,7 @@ export default function naviix(rects, config = {}) {
     }
     // combine edgeX
     mergeMap(edgeX, _edgeX);
-    // replace edgeX
+    // replace edgeX, discard edgeX of prev page
     edgeX.set(wrapId, edgeX.get(wrapId).filter(xs => !edgeXOfWrap.includes(xs)));
   }
 
@@ -439,7 +439,7 @@ function getXBySimple(rects, wrap, subWraps) {
       origin: s,
       surrounded: surroundedI === 4,
       dis: {
-        up: minRDis,
+        up: minUpDis,
         down: minDownDis,
         right: minRDis,
         left: minLDis,
