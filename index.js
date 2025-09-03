@@ -137,8 +137,8 @@ export default function naviix(rects, config = {}) {
           const r2Info = x.get(allDirWrapX[i]);
           const r2 = r2Info.origin;
           const targetLoc = calcLocIfE(r2);
-          const r2WrapInfo = x.get(r2.wrapId);
-          if (!isVisualElement(targetLoc, calcLocIfE(r2WrapInfo.origin))) continue;
+          const r2WrapInfo = x.get(r2Info.wrapId);
+          if (r2WrapInfo != null && !isVisualElement(targetLoc, calcLocIfE(r2WrapInfo.origin))) continue;
           const { dis, isProj } = calcMinDis(startLoc, targetLoc);
 
           if (dis < minLDis) {
@@ -193,7 +193,7 @@ export default function naviix(rects, config = {}) {
       function findAllSideXOfWrap(wrapX, dir) {
         const sideX = [];
         wrapX.forEach(xId => {
-          const subExitWrapX = exitWrapX.get(xId)[dir];
+          const subExitWrapX = (exitWrapX.get(xId) || {})[dir];
           if (subExitWrapX == null) sideX.push(xId);
           else sideX.push(...findAllSideXOfWrap(subExitWrapX));
         });
@@ -313,13 +313,14 @@ function getX(rects, notRoot) {
 
   function improveHelperDataByX(x) {
     for(const [xId, xInfo] of x) {
+      const _xId = Array.isArray(xId) ? [xId] : xId;
       const { nextWrap, nextSubWrap, wrapId, surrounded } = xInfo;
       for(const dir of dirs) {
         if (nextWrap[dir]) {
           const gotExitWrapX = exitWrapX.get(wrapId);
           exitWrapX.set(wrapId, {
             ...gotExitWrapX,
-            [dir]: ((gotExitWrapX && gotExitWrapX[dir]) || []).concat(xId),
+            [dir]: ((gotExitWrapX && gotExitWrapX[dir]) || []).concat(_xId),
           });
         }
         if (nextSubWrap[dir]) {
@@ -327,12 +328,12 @@ function getX(rects, notRoot) {
           const gotEnterWrapX = enterWrapX.get(wrapId);
           enterWrapX.set(wrapId, {
             ...gotEnterWrapX,
-            [dir]: ((gotEnterWrapX && gotEnterWrapX[dir]) || []).concat(xId),
+            [dir]: ((gotEnterWrapX && gotEnterWrapX[dir]) || []).concat(_xId),
           })
         }
       }
       if (!surrounded) {
-        edgeX.set(wrapId, (edgeX.get(wrapId) || []).concat(xId));
+        edgeX.set(wrapId, (edgeX.get(wrapId) || []).concat(_xId));
       }
     }
   }

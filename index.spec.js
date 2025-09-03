@@ -227,5 +227,27 @@ describe("naviix", function () {
     assert.equal(d4, undefined);
     assert.equal(lw.id, s1);
   });
+
+  it.only("准确导航到可滚动元素", function() {
+    const s1 = [1, 8, 1, 1];
+    const s2 = [5, 8, 1, 1];
+    const s3 = [5, 5, 1, 1];
+    const s4 = [5, 2, 1, 1];
+    const w = [5, 7.5, 2, 2.5];
+    const { scroll, left, up, right, down } = naviix({
+      "locs": [s1],
+      "subs": {
+        "locs": [s2, s3, s4],
+        "wrap": w,
+      }
+    }, { scroll: true });
+    assert.equal(right(s1).id, s2);
+    assert.equal(left(s2).id, s1);
+    scroll([
+      { id: s2, loc: [5, 8 + 3, 1, 1] },
+      { id: s3, loc: [5, 5 + 3, 1, 1] },
+      { id: s4, loc: [5, 2 + 3, 1, 1] }]); // 向上滚动 3 单位
+    assert.equal(right(s1).id, s3);
+  });
 }); 
 
