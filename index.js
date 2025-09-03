@@ -167,7 +167,7 @@ export default function naviix(rects, config = {}) {
        */
       function getAllEnterWrapX(wrapId, dir) {
         const exitWrapIdX = exitWrapX.get(wrapId)[dir];
-        return t(exitWrapIdX, dir);
+        return findAllSideXOfWrap(exitWrapIdX, dir);
       }
 
       /**
@@ -187,18 +187,18 @@ export default function naviix(rects, config = {}) {
        */
       function getAllExitWrapX(wrapId, dir) {
         const enterWrapIdX = enterWrapX.get(wrapId)[dir];
-        return t(enterWrapIdX, dir);
+        return findAllSideXOfWrap(enterWrapIdX, dir);
       }
 
-      function t(wrapX, dir) {
-        const tt = [];
+      function findAllSideXOfWrap(wrapX, dir) {
+        const sideX = [];
         wrapX.forEach(xId => {
           const subExitWrapX = exitWrapX.get(xId)[dir];
-          if (subExitWrapX == null) tt.push(xId);
-          else tt.push(...t(subExitWrapX));
+          if (subExitWrapX == null) sideX.push(xId);
+          else sideX.push(...findAllSideXOfWrap(subExitWrapX));
         });
 
-        return tt;
+        return sideX;
       }
 
       function calcLocIfE(x) {
