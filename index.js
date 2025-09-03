@@ -344,14 +344,9 @@ function getXBySimple(rects, wrap, subWraps) {
   const sortedY = [...rects];
   sortedY.sort((s1, s2) => s1.loc[1] - s2.loc[1]);
   const dirMap = new Map();
-  let t = -Infinity;
-  let b = Infinity;
-  let l = Infinity;
-  let r = -Infinity;
   let surroundedI = 0;
 
   rects.forEach(s => {
-    const [x, y, t1, t2] = s.loc;
     const sOrderY = sortedY.findIndex(e => e.id === s.id);
     const sOrderX = sortedX.findIndex(e => e.id === s.id);
 
@@ -450,15 +445,9 @@ function getXBySimple(rects, wrap, subWraps) {
         left: minLDis,
       }
     });
-
-    // 更新边界
-    t = y + t2 > t ? y + t2 : t;
-    b = y - t2 < b ? y - t2 : b;
-    l = x - t2 < l ? x - t1 : l;
-    r = x + t2 > r ? x + t1 : r;
   });
 
-  return { x: dirMap, t, b, l, r };
+  return { x: dirMap };
 }
 
 function getMinDownDis(s, s2) {
