@@ -60,9 +60,14 @@ export default function naviix(rects, config = {}) {
 
   function more(wrapId, newRects) {
     const edgeXOfWrap = edgeX.get(wrapId);
-    const edgeXRects = edgeXOfWrap.map(eId => rawX.get(eId).origin);
+    const [edgeXRects, wrapEdgeXRects] = edgeXOfWrap.reduce((acc, cur) => {
+      if (cur.isWrap) acc[1].push({ wrap: rawX.get(cur.id).origin });
+      else acc[0].push(rawX.get(cur.id).origin);
+      return acc;
+    }, [], []);
     const formattedRects = formatIpt(newRects);
-    Array.prototype.push.apply(formattedRects[0].locs, edgeXRects); // 暂不支持 subs
+    Array.prototype.push.apply(formattedRects[0].locs, edgeXRects);
+    Array.prototype.push.apply(formattedRects[0].subs, wrapEdgeXRects);
     const { x: _rawX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(formattedRects);
 
     // combine rawX
@@ -97,7 +102,7 @@ export default function naviix(rects, config = {}) {
     // combine edgeX
     mergeMap(edgeX, _edgeX);
     // replace edgeX, discard edgeX of prev page
-    edgeX.set(wrapId, edgeX.get(wrapId).filter(xs => !edgeXOfWrap.includes(xs)));
+    edgeX.set(wrapId, edgeX.get(wrapId).filter(xs => !edgeXOfWrap.some(_xs => _xs.id === xs.id)));
   }
 
   function scrollReturn(x) {
@@ -314,7 +319,7 @@ function getX(rects, notRoot) {
   function improveHelperDataByX(x) {
     for(const [xId, xInfo] of x) {
       const _xId = Array.isArray(xId) ? [xId] : xId;
-      const { nextWrap, nextSubWrap, wrapId, surrounded } = xInfo;
+      const { nextWrap, nextSubWrap, wrapId, surrounded, isWrap } = xInfo;
       for(const dir of dirs) {
         if (nextWrap[dir]) {
           const gotExitWrapX = exitWrapX.get(wrapId);
@@ -333,13 +338,13 @@ function getX(rects, notRoot) {
         }
       }
       if (!surrounded) {
-        edgeX.set(wrapId, (edgeX.get(wrapId) || []).concat(_xId));
+        edgeX.set(wrapId, (edgeX.get(wrapId) || []).concat({ id: _xId, isWrap }));
       }
     }
   }
 }
 
-function getXBySimple(rects, wrap, subWraps) {
+function getXBySimple(rects, wrap, subWraps = []) {
   const sortedX = [...rects];
   sortedX.sort((s1, s2) => s1.loc[0] - s2.loc[0]);
   const sortedY = [...rects];
@@ -438,6 +443,7 @@ function getXBySimple(rects, wrap, subWraps) {
       },
       wrapId: wrap == null ? "root" : wrap.id,
       origin: s,
+      isWrap: subWraps.includes(s),
       surrounded: surroundedI === 4,
       dis: {
         up: minUpDis,
