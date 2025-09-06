@@ -228,7 +228,7 @@ describe("naviix", function () {
     assert.equal(lw.id, s1);
   });
 
-  it.only("准确导航到可滚动元素", function() {
+  it("准确导航到可滚动元素", function() {
     const s1 = [1, 8, 1, 1];
     const s2 = [5, 8, 1, 1];
     const s3 = [5, 5, 1, 1];

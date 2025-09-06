@@ -682,19 +682,9 @@ function istanceofHtmlElement(o) {
  */
 function updateRawXByScroll(rawX, newX) {
   const mapNewX = newX instanceof Map ? newX : newX.reduce((acc, { id, loc }) => acc.set(id, loc), new Map());
-  for (const [, val] of rawX) {
-    const { up, right, down, left } = val;
-    rep(up);
-    rep(right);
-    rep(down);
-    rep(left);
-  }
-
-  function rep(dirX) {
-    if (dirX) {
-      const newLoc = mapNewX.get(dirX.id)
-      if (newLoc) dirX.loc = newLoc;
-    }
+  for (const [id, loc] of mapNewX) {
+    const xInfo = rawX.get(id);
+    if (xInfo) xInfo.origin.loc = loc;
   }
 }
 
