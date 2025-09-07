@@ -307,5 +307,63 @@ describe("naviix", function () {
     assert.equal(up(s9).id, s5);
     assert.equal(up(s5).id, s2);
   });
+
+  /**
+   *  +-------------+ +-------------+
+   *  | +---+ +---+ | | +---+ +---+ | +---+
+   *  | | 7 | | 8 | | | | 9 | |10 | | |11 |
+   *  | +---+ +---+ | | +---+ +---+ | +---+
+   *  +-------------+ +-------------+
+   *  +-------------------------------------+
+   *  | +---+ +---+ +---+ +---+ +---+ +---+ |
+   *  | | 1 | | 2 | | 3 | | 4 | | 5 | | 6 | |
+   *  | +---+ +---+ +---+ +---+ +---+ +---+ |
+   *  +-------------------------------------+
+   */
+  it("记忆导航 2", function() {
+    const w1 = [10.5, 3, 9.5, 2];
+    const r1 = [3, 3, 1, 1];
+    const r2 = [6, 3, 1, 1];
+    const r3 = [9, 3, 1, 1];
+    const r4 = [12, 3, 1, 1];
+    const r5 = [15, 3, 1, 1];
+    const r6 = [18, 3, 1, 1];
+    const w2 = [4.5, 8, 3.5, 2];
+    const r7 = [3, 8, 1, 1];
+    const r8 = [6, 8, 1, 1];
+    const w3 = [12.5, 8, 3.5, 2];
+    const r9 = [11, 8, 1, 1];
+    const r10 = [14, 8, 1, 1];
+    const r11 = [18, 8, 1, 1];
+    const { left, up, right, down } = naviix({
+      "locs": [r11],
+      "subs": [{
+        "locs": [r1, r2, r3, r4, r5, r6],
+        "wrap": w1,
+      }, {
+        "locs": [r7, r8],
+        "wrap": w2,
+      }, {
+        "locs": [r9, r10],
+        "wrap": w3,
+      }]
+    }, { memo: true });
+    assert.equal(left(r11).id, r9);
+    assert.equal(down(r9).id, r1);
+    assert.equal(right(r1).id, r2);
+    assert.equal(right(r2).id, r3);
+    assert.equal(up(r3).id, r9);
+    assert.equal(left(r9).id, r7);
+    assert.equal(right(r7).id, r8);
+    assert.equal(down(r8).id, r3);
+    assert.equal(right(r3).id, r4);
+    assert.equal(up(r4).id, r8);
+    assert.equal(right(r8).id, r9);
+    assert.equal(right(r9).id, r10);
+    assert.equal(right(r10).id, r11);
+    assert.equal(down(r11).id, r4);
+    assert.equal(right(r4).id, r5);
+    assert.equal(up(r5).id, r11);
+  });
 }); 
 

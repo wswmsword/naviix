@@ -235,17 +235,35 @@ export default function naviix(rects, config = {}) {
       const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
       const memo = memoMap.get(dirX.id) || {};
       if (dirXIsWrap) { // exit
-        if (memo.exit[dir]) return memo.exit[dir];
-        const xInfo = x.get(dirX.id);
-        if (xInfo.nextSubWrap[dir]) { // 方向矩形为 wrap
-          const sibWrap = xInfo[dir];
-          const sibWrapMemo = memoMap.get(sibWrap.id)
-          if (sibWrapMemo.enter) return sibWrapMemo.enter;
+        let targetX = null;
+        let targetXWrapId = null;
+        if (memo.exit && memo.exit[dir]) targetX = memo.exit[dir];
+        else {
+          const xInfo = x.get(dirX.id);
+          if (xInfo.nextSubWrap[dir]) { // 方向矩形为 wrap
+            const sibWrap = xInfo[dir];
+            const sibWrapMemo = memoMap.get(sibWrap.id) || {};
+            if (sibWrapMemo.enter) {
+              targetX = sibWrapMemo.enter;
+              targetXWrapId = sibWrap.id;
+            }
+          }
+          if (targetX == null) targetX = genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
         }
-        return genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
+        if (targetXWrapId == null) targetXWrapId = x.get(targetX.id).wrapId;
+        updateMemo(targetX, targetXWrapId);
+        return targetX;
       } else if (dirXIsSubWrap) { // enter
-        return memo.enter || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
+        const targetX = memo.enter || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
+        updateMemo(targetX, dirX);
+        return targetX;
       } else {
+        updateMemo(dirX, wrapId);
+        return dirX;
+      }
+
+      function updateMemo(targetX, wrapId) {
+
         const { left: nextL, right: nextR, up: nextU, down: nextD,
           nextSubWrap: {
             left: nextLIsSubWrap,
@@ -259,7 +277,7 @@ export default function naviix(rects, config = {}) {
             right: nextRIsWrap,
             down: nextDIsWrap,
           }
-        } = x.get(dirX.id);
+        } = x.get(targetX.id);
         // 更新 exit
         updateExitMemo(nextLIsSubWrap, nextLIsWrap, nextL, "left", "right");
         updateExitMemo(nextUIsSubWrap, nextUIsWrap, nextU, "up", "down");
@@ -268,9 +286,8 @@ export default function naviix(rects, config = {}) {
         // 更新 enter
         memoMap.set(wrapId, {
           ...memoMap.get(wrapId),
-          enter: dirX,
+          enter: targetX,
         });
-        return dirX;
 
         function updateExitMemo(nextDirXIsSubWrap, nextDirXIsWrap, nextDirX, dir, antiDir) {
           if (nextDirXIsSubWrap) {
@@ -279,7 +296,7 @@ export default function naviix(rects, config = {}) {
               ...memo,
               exit: {
                 ...memo.exit,
-                [antiDir]: dirX,
+                [antiDir]: targetX,
               }
             });
           } else if (nextDirXIsWrap) { // 更新兄弟 wrap 的 exit
@@ -292,7 +309,7 @@ export default function naviix(rects, config = {}) {
               ...memo,
               exit: {
                 ...memo.exit,
-                [antiDir]: dirX,
+                [antiDir]: targetX,
               }
             })
           }
@@ -705,7 +722,7 @@ function istanceofHtmlElement(o) {
 }
 
 /**
- * 
+ * 更新矩形引用的位置信息
  * @param {any} id 
  * @param {Map} rawX 
  * @param {Array<{id: any, loc: number[]}>|Map} newX 
