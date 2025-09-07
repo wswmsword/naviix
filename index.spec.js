@@ -249,5 +249,63 @@ describe("naviix", function () {
       { id: s4, loc: [5, 2 + 3, 1, 1] }]); // 向上滚动 3 单位
     assert.equal(right(s1).id, s3);
   });
+
+  /**
+   *    +---+  +---+  +---+  +---+
+   *    | 1 |  | 2 |  | 3 |  | 4 |
+   *    +---+  +---+  +---+  +---+
+   *  +---------------------+
+   *  | +---+  +---+  +---+ |
+   *  | | 5 |  | 6 |  | 7 | |
+   *  | +---+  +---+  +---+ |
+   *  +---------------------+
+   *  +---------------------+
+   *  | +---+  +---+  +---+ |
+   *  | | 8 |  | 9 |  | 10| |
+   *  | +---+  +---+  +---+ |
+   *  +---------------------+
+   */
+  it("记忆导航", function() {
+    const s1 = [3, 12, 1, 1];
+    const s2 = [6, 12, 1, 1];
+    const s3 = [9, 12, 1, 1];
+    const s4 = [12, 12, 1, 1];
+    const s5 = [3, 8, 1, 1];
+    const s6 = [6, 8, 1, 1];
+    const s7 = [9, 8, 1, 1];
+    const s8 = [3, 3, 1, 1];
+    const s9 = [6, 3, 1, 1];
+    const s10 = [9, 3, 1, 1];
+    const w1 = [6, 8, 5, 2];
+    const w2 = [6, 3, 5, 2];
+
+    const { left, up, right, down } = naviix({
+      "locs": [s1, s2, s3, s4],
+      "subs": [{
+        "locs": [s5, s6, s7],
+        "wrap": w1,
+      }, {
+        "locs": [s8, s9, s10],
+        "wrap": w2,
+      }]
+    }, { memo: true });
+
+    assert.equal(right(s1).id, s2);
+    assert.equal(right(s2).id, s3);
+    assert.equal(down(s3).id, s5);
+    assert.equal(up(s5).id, s3);
+    assert.equal(left(s3).id, s2);
+    assert.equal(down(s2).id, s5);
+    assert.equal(right(s5).id, s6);
+    assert.equal(right(s6).id, s7);
+    assert.equal(down(s7).id, s8);
+    assert.equal(right(s8).id, s9);
+    assert.equal(up(s9).id, s7);
+    assert.equal(left(s7).id, s6);
+    assert.equal(left(s6).id, s5);
+    assert.equal(down(s5).id, s9);
+    assert.equal(up(s9).id, s5);
+    assert.equal(up(s5).id, s2);
+  });
 }); 
 

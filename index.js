@@ -214,10 +214,10 @@ export default function naviix(rects, config = {}) {
 
   function memoReturn(x) {
     return {
-      left: (id) => getMemoizedDirX(id, "left", "right"),
-      up: (id) => getMemoizedDirX(id, "up", "down"),
-      right: (id) => getMemoizedDirX(id, "right", "left"),
-      down: (id) => getMemoizedDirX(id, "down", "up"),
+      left: (id) => getMemoizedDirX(id, "left"),
+      up: (id) => getMemoizedDirX(id, "up"),
+      right: (id) => getMemoizedDirX(id, "right"),
+      down: (id) => getMemoizedDirX(id, "down"),
       update,
       more,
     };
@@ -227,18 +227,23 @@ export default function naviix(rects, config = {}) {
      * @param {string} dir 
      * @returns 
      */
-    function getMemoizedDirX(id, dir, antiDir) {
+    function getMemoizedDirX(id, dir) {
       const idXInfo = x.get(id);
       const { wrapId } = idXInfo;
       const dirX = idXInfo[dir];
       const dirXIsWrap = idXInfo.nextWrap[dir];
       const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
-      const memo = memoMap.get(id);
+      const memo = memoMap.get(dirX.id) || {};
       if (dirXIsWrap) { // exit
-        const exit = memo.exit[dir] || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
-        return exit;
+        if (memo.exit[dir]) return memo.exit[dir];
+        const xInfo = x.get(dirX.id);
+        if (xInfo.nextSubWrap[dir]) { // 方向矩形为 wrap
+          const sibWrap = xInfo[dir];
+          const sibWrapMemo = memoMap.get(sibWrap.id)
+          if (sibWrapMemo.enter) return sibWrapMemo.enter;
+        }
+        return genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
       } else if (dirXIsSubWrap) { // enter
-        const memo = memoMap.get(dirX.id) || {};
         return memo.enter || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
       } else {
         const { left: nextL, right: nextR, up: nextU, down: nextD,
@@ -247,30 +252,49 @@ export default function naviix(rects, config = {}) {
             up: nextUIsSubWrap,
             right: nextRIsSubWrap,
             down: nextDIsSubWrap,
+          },
+          nextWrap: {
+            left: nextLIsWrap,
+            up: nextUIsWrap,
+            right: nextRIsWrap,
+            down: nextDIsWrap,
           }
         } = x.get(dirX.id);
         // 更新 exit
-        updateSubExitMemo(nextLIsSubWrap, nextL, antiDir);
-        updateSubExitMemo(nextUIsSubWrap, nextU, antiDir);
-        updateSubExitMemo(nextRIsSubWrap, nextR, antiDir);
-        updateSubExitMemo(nextDIsSubWrap, nextD, antiDir);
+        updateExitMemo(nextLIsSubWrap, nextLIsWrap, nextL, "left", "right");
+        updateExitMemo(nextUIsSubWrap, nextUIsWrap, nextU, "up", "down");
+        updateExitMemo(nextRIsSubWrap, nextRIsWrap, nextR, "right", "left");
+        updateExitMemo(nextDIsSubWrap, nextDIsWrap, nextD, "down", "up");
         // 更新 enter
         memoMap.set(wrapId, {
-          ...memo,
+          ...memoMap.get(wrapId),
           enter: dirX,
         });
         return dirX;
 
-        function updateSubExitMemo(nextDirXIsSubWrap, nextDirX, dir) {
+        function updateExitMemo(nextDirXIsSubWrap, nextDirXIsWrap, nextDirX, dir, antiDir) {
           if (nextDirXIsSubWrap) {
-            const memo = memoMap.get(nextDirX.id);
+            const memo = memoMap.get(nextDirX.id) || {};
             memoMap.set(nextDirX.id, {
               ...memo,
               exit: {
                 ...memo.exit,
-                [dir]: dirX,
+                [antiDir]: dirX,
               }
             });
+          } else if (nextDirXIsWrap) { // 更新兄弟 wrap 的 exit
+            if (nextDirX == null) return;
+            const xInfo = x.get(nextDirX.id);
+            if (!xInfo.nextSubWrap[dir]) return; // 方向矩形非 wrap
+            const sibWrap = xInfo[dir];
+            const memo = memoMap.get(sibWrap.id) || {};
+            memoMap.set(sibWrap.id, {
+              ...memo,
+              exit: {
+                ...memo.exit,
+                [antiDir]: dirX,
+              }
+            })
           }
         }
       }
