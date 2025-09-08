@@ -251,6 +251,54 @@ describe("naviix", function () {
   });
 
   /**
+   *        +-------+ +-------+
+   *  +---+ | +---+ | | +---+ |
+   *  | 1 | | | 2 | | | | 5 | |
+   *  +---+ | +---+ | | +---+ |
+   *        | +---+ | | +---+ |
+   *        +-| 3 |-+ +-| 6 |-+
+   *        . +---+ . . +---+ .
+   *        . +---+ . . +---+ .
+   *        . | 4 | . . | 7 | .
+   *        . +---+ . . +---+ .
+   *        . . . . . . . . . .
+   */
+  it.only("准确导航到可滚动元素 2", function() {
+    const r1 = [1, 8, 1, 1];
+    const r2 = [5, 8, 1, 1];
+    const r3 = [5, 5, 1, 1];
+    const r4 = [5, 2, 1, 1];
+    const w = [5, 7.5, 2, 2.5];
+    const r5 = [10, 8, 1, 1];
+    const r6 = [10, 5, 1, 1];
+    const r7 = [10, 2, 1, 1];
+    const w2 = [10, 7.5, 2, 2.5];
+    const { scroll, left, up, right, down } = naviix({
+      "locs": [r1],
+      "subs": [{
+        "locs": [r2, r3, r4],
+        "wrap": w,
+      }, {
+        "locs": [r5, r6, r7],
+        "wrap": w2,
+      }]
+    }, { scroll: true });
+    assert.equal(right(r1).id, r2);
+    scroll([
+      { id: r5, loc: [10, 8 + 3, 1, 1] },
+      { id: r6, loc: [10, 5 + 3, 1, 1] },
+      { id: r7, loc: [10, 2 + 3, 1, 1] }]); // 向上滚动 3 单位
+    assert.equal(right(r2).id, r6);
+    assert.equal(left(r6).id, r2);
+    assert.equal(right(r2).id, r6);
+    scroll([
+      { id: r2, loc: [5, 8 + 3, 1, 1] },
+      { id: r3, loc: [5, 5 + 3, 1, 1] },
+      { id: r4, loc: [5, 2 + 3, 1, 1] }]); // 向上滚动 3 单位
+    assert.equal(left(r6).id, r3);
+  });
+
+  /**
    *    +---+  +---+  +---+  +---+
    *    | 1 |  | 2 |  | 3 |  | 4 |
    *    +---+  +---+  +---+  +---+
