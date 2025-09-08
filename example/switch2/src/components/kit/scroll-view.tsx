@@ -19,7 +19,7 @@ export default function ScrollView() {
   const scrollSpeed = 160;
   const dynamicSpeed = useRef(-1);
   const focusInterval = 84; // 1000 / 60 * 5
-  const safeWidth = 70; // 矩形的最右侧要在安全宽度左侧，矩形的最左侧要在安全宽度右侧
+  const safeWidth = 93; // 矩形的最右侧要在安全宽度左侧，矩形的最左侧要在安全宽度右侧
   /** 按下方向键后首次聚焦 */
   const focusedFirst = useRef(false);
   const moveRRafId = useRef<number>(-1);
@@ -59,10 +59,10 @@ export default function ScrollView() {
     }
   }, []);
 
-  return <div id="gms" className="border w-full max-w-7xl h-70 overflow-x-auto flex gap-10 items-center px-10" ref={wrapE}
+  return <div id="gms" className="w-full max-w-7xl overflow-x-auto flex gap-[14px] items-center px-[107px] scrollbar-hide absolute top-[194px]" ref={wrapE}
     onKeyDown={keyNav}
     onKeyUp={keyUp}>
-    {games.map((g, i) => <button className="w-50 h-50 border shrink-0 rounded-sm" key={i} ref={e => { if(e) gamesE.current[i] = e }}>1</button>)}
+    {games.map((g, i) => <button className="w-64 h-64 border box-border border-black shrink-0" key={i} ref={e => { if(e) gamesE.current[i] = e }}>1</button>)}
   </div>;
 
   function keyUp(e: KeyboardEvent) {
@@ -74,7 +74,7 @@ export default function ScrollView() {
   }
 
   function keyNav(e: KeyboardEvent) {
-    if (e.key === "ArrowRight") e.preventDefault();
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") e.preventDefault();
     if (e.key === "ArrowRight" && !isKeyPressed) {
       isKeyPressed = true;
       isKeyLongPressed = false;
@@ -138,14 +138,64 @@ export default function ScrollView() {
       }
       
     } else if (e.key === "ArrowLeft" && !isKeyPressed) {
+      isKeyPressed = true;
+      isKeyLongPressed = false;
+      focusedFirst.current = false;
       e.preventDefault();
-      moveL()
+      cancelAnimationFrame(safeScrollRafId.current);
+      moveRRafId.current = requestAnimationFrame(moveR)
 
-      function moveL() {
+      // 聚焦
+      // 控制滚动，滚动到安全区域
+      let lastFocusTime = -Infinity;
+
+      function moveR() {
+        const cur = Date.now();
         const nextInfo = x.current.get(document.activeElement);
         if (nextInfo.left) {
           const nextE = nextInfo.left.id;
-          nextE.focus();
+          const _wrapE = wrapE.current as HTMLDivElement;
+
+          const isOutOfView = isElementOutOfHorizontalView(nextE, _wrapE);
+
+          if (isOutOfView) {
+            _wrapE.scrollLeft -= dynamicSpeed.current;
+            moveRRafId.current = requestAnimationFrame(moveR);
+            return ;
+          }
+
+          if (!focusedFirst.current) {
+            focusedFirst.current = true;
+            lastFocusTime = cur;
+            nextE.focus({ preventScroll: true });
+            scrollToSafeArea();
+            return ;
+          } else if (!isKeyLongPressed) {
+            if (cur - lastFocusTime > longPressTime) {
+              isKeyLongPressed = true;
+              lastFocusTime = cur;
+              nextE.focus({ preventScroll: true });
+              scrollToSafeArea();
+            } else moveRRafId.current = requestAnimationFrame(moveR);
+          } else {
+            if (cur - lastFocusTime > focusInterval) {
+              lastFocusTime = cur;
+              nextE.focus({ preventScroll: true });
+              scrollToSafeArea();
+            } else moveRRafId.current = requestAnimationFrame(moveR);
+          }
+
+          function scrollToSafeArea() {
+            const elRight = nextE.offsetLeft;
+            const wrapRight = _wrapE.scrollLeft;
+            if (elRight - wrapRight > safeWidth) {
+              if (isKeyPressed) moveR();
+              return ;
+            }
+            _wrapE.scrollLeft -= dynamicSpeed.current;
+            safeScrollRafId.current = requestAnimationFrame(scrollToSafeArea);
+          }
+          return ;
         }
       }
     }
