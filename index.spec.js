@@ -263,7 +263,7 @@ describe("naviix", function () {
    *        . +---+ . . +---+ .
    *        . . . . . . . . . .
    */
-  it.only("准确导航到可滚动元素 2", function() {
+  it("准确导航到可滚动元素 2", function() {
     const r1 = [1, 8, 1, 1];
     const r2 = [5, 8, 1, 1];
     const r3 = [5, 5, 1, 1];
@@ -412,6 +412,45 @@ describe("naviix", function () {
     assert.equal(down(r11).id, r4);
     assert.equal(right(r4).id, r5);
     assert.equal(up(r5).id, r11);
+  });
+
+  /**
+   *        +-------+             +-------+
+   *  +---+ | +---+ |       +---+ | +---+ |
+   *  |>1<| | | 3 | |       | 1 | | | 5 | |
+   *  +---+ | +---+ | --->  +---+ | +---+ |
+   *  +---+ | +---+ |       +---+ | +---+ |
+   *  | 2 | | | 4 | |       |>2<| | | 6 | |
+   *  +---+ | +---+ |       +---+ | +---+ |
+   *        +-------+             +-------+
+   */
+  it("更新（记忆导航）", function() {
+    const r1 = [2, 6, 1, 1];
+    const r2 = [2, 3, 1, 1];
+    const w = [6, 4.5, 2, 3.5];
+    const r3 = { id: "r3", loc: [6, 6, 1, 1] };
+    const r4 = { id: "r4", loc: [6, 3, 1, 1] };
+    const r5 = { id: "r5", loc: [6, 6, 1, 1] };
+    const r6 = { id: "r6", loc: [6, 3, 1, 1] };
+
+    const { left, up, right, down, update } = naviix({
+      "locs": [r1, r2],
+      "subs": {
+        "locs": [r3, r4],
+        "wrap": w,
+      }
+    }, { memo: true });
+
+    assert.equal(right(r1).id, "r3");
+    assert.equal(down("r3").id, "r4");
+    assert.equal(left("r4").id, r1);
+    assert.equal(down(r1).id, r2);
+    update(w, { locs: [r5, r6], wrap: w });
+    assert.equal(right(r2).id, "r5");
+    assert.equal(down("r5").id, "r6");
+    assert.equal(left("r6").id, r2);
+    assert.equal(up(r2).id, r1);
+    assert.equal(right(r1).id, "r6");
   });
 }); 
 
