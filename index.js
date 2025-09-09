@@ -345,9 +345,7 @@ function getX(rects, notRoot) {
 
   rects.forEach(({ locs, subs, wrap }) => {
     const subWraps = (subs || []).map(s => s.wrap);
-    (subs || []).map(s => {
-      firstInWrap.set(s.wrap.id, s.locs[0]);
-    });
+    if (wrap) firstInWrap.set(wrap.id, locs[0]);
     const newLocs = locs.concat(subWraps);
     const { x } = getXBySimple(newLocs, wrap, subWraps);
     improveHelperDataByX(x);
