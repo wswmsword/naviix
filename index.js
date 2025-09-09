@@ -47,7 +47,9 @@ export default function naviix(rects, config = {}) {
             enterWrapX.delete(curWrapId);
             memoMap.delete(curWrapId);
           } else {
-            delete memoMap.get(curWrapId).enter;
+            const wrapMemo = memoMap.get(curWrapId);
+            if (wrapMemo && wrapMemo.enter)
+              delete wrapMemo.enter;
           }
         }
         const res = cleanByFormattedRects(subs, _found);
