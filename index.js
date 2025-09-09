@@ -251,10 +251,14 @@ export default function naviix(rects, config = {}) {
           if (targetX == null) targetX = genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
         }
         if (targetXWrapId == null) targetXWrapId = x.get(targetX.id).wrapId;
+        if ((memoMap.get(wrapId) || {}).enter !== idXInfo.origin)
+          updateMemo(idXInfo.origin, wrapId); // exit 的起始点
         updateMemo(targetX, targetXWrapId);
         return targetX;
       } else if (dirXIsSubWrap) { // enter
         const targetX = memo.enter || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
+        if ((memoMap.get(wrapId) || {}).enter !== idXInfo.origin)
+          updateMemo(idXInfo.origin, wrapId); // enter 的起始点
         updateMemo(targetX, dirX);
         return targetX;
       } else {
