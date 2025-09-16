@@ -16,11 +16,13 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.526.0",
+    "motion": "^12.23.12",
+    "naviix": "file:../..",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
-    "naviix": "file:../.."
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

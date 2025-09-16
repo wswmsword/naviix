@@ -1,9 +1,11 @@
 import naviix from "naviix";
 import { useEffect, useRef, type KeyboardEvent } from "react";
+import GameBtn from "./game-btn";
 
 /** 长按则滚动，滚动速度由焦点聚焦导航的速度一致，点按有独立的滚动速度，raf 实现 */
 export default function ScrollView() {
-  const games = new Array(50).fill(0);
+  const games = new Array(50).fill(null);
+  games[0] = "/src/assets/game/tok.avif";
   const gamesE = useRef<(HTMLButtonElement)[]>([]);
   const wrapE = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,10 +61,12 @@ export default function ScrollView() {
     }
   }, []);
 
-  return <div id="gms" className="w-full max-w-7xl overflow-x-auto flex gap-[14px] items-center px-[107px] scrollbar-hide absolute top-[194px]" ref={wrapE}
+  return <div id="gms" className="w-full max-w-7xl overflow-x-auto flex gap-[14px] items-center px-[107px] py-16 scrollbar-hide absolute top-[130px]" ref={wrapE}
     onKeyDown={keyNav}
     onKeyUp={keyUp}>
-    {games.map((g, i) => <button className="w-64 h-64 border box-border border-black shrink-0" key={i} ref={e => { if(e) gamesE.current[i] = e }}>1</button>)}
+    {games.map((g, i) => <GameBtn
+      src={g}
+      ref={e => { if(e) gamesE.current[i] = e }} key={i} />)}
   </div>;
 
   function keyUp(e: KeyboardEvent) {

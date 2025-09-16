@@ -1,0 +1,49 @@
+.btn {
+  box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.1), 0px 0px 0px 3px inset white;
+}
+
+.btn.a {
+  animation: anime0 .2s;
+}
+
+.animeP {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent),
+              linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  mask-composite: intersect;
+  opacity: .5;
+}
+
+.animeP.a2 {
+  animation: anime 1s;
+  /* https://easingwizard.com/ */
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes anime0 {
+  from {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(.97);
+  }
+  95% {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes anime {
+  from {
+    opacity: .5;
+    transform: scale(1);
+  }
+  15% {
+    opacity: .5;
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
