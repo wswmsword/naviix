@@ -199,7 +199,7 @@ export default function naviix(rects, config = {}) {
 
       function findAllSideXOfWrap(wrapX, dir) {
         const sideX = [];
-        wrapX.forEach(xId => {
+        (wrapX || []).forEach(xId => {
           const subExitWrapX = (exitWrapX.get(xId) || {})[dir];
           if (subExitWrapX == null) sideX.push(xId);
           else sideX.push(...findAllSideXOfWrap(subExitWrapX));
