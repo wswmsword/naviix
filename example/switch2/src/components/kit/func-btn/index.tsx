@@ -12,7 +12,7 @@ export default function FuncBtn({ className, children, onClick: _oc }: React.Com
     onKeyDown={onKeyD}
     onClick={onClick}
     onAnimationEnd={onAE}
-    className={cn("relative w-[72px] h-[72px] rounded-full bg-white border border-[#dfdfdf] flex items-center justify-center",
+    className={cn("nvx relative w-[72px] h-[72px] rounded-full bg-white border border-[#dfdfdf] flex items-center justify-center",
       animating ? styles.animating : "",
       styles.btn,
       className)}>

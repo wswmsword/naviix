@@ -1,15 +1,17 @@
 import naviix from "naviix";
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { use, useEffect, useRef, type KeyboardEvent } from "react";
 import GameBtn from "./game-btn";
+import { HomeNvxContext } from "@/context";
 
 /** 长按则滚动，滚动速度由焦点聚焦导航的速度一致，点按有独立的滚动速度，raf 实现 */
 export default function ScrollView() {
-  const games = new Array(50).fill(null);
+  const games = new Array(12).fill(null);
   games[0] = "/src/assets/game/tok.avif";
   const gamesE = useRef<(HTMLButtonElement)[]>([]);
   const wrapE = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const x = useRef<any>(null);
+  const nvx = use(HomeNvxContext);
 
   useEffect(() => {
     x.current = naviix(gamesE.current);
@@ -93,9 +95,9 @@ export default function ScrollView() {
 
       function moveR() {
         const cur = Date.now();
-        const nextInfo = x.current.get(document.activeElement);
-        if (nextInfo.right) {
-          const nextE = nextInfo.right.id;
+        const nextInfo = nvx?.current.right(document.activeElement);
+        if (nextInfo) {
+          const nextE = nextInfo.id;
           const _wrapE = wrapE.current as HTMLDivElement;
 
           const isOutOfView = isElementOutOfHorizontalView(nextE, _wrapE);
@@ -155,9 +157,9 @@ export default function ScrollView() {
 
       function moveR() {
         const cur = Date.now();
-        const nextInfo = x.current.get(document.activeElement);
-        if (nextInfo.left) {
-          const nextE = nextInfo.left.id;
+        const nextInfo = nvx?.current.left(document.activeElement);
+        if (nextInfo) {
+          const nextE = nextInfo.id;
           const _wrapE = wrapE.current as HTMLDivElement;
 
           const isOutOfView = isElementOutOfHorizontalView(nextE, _wrapE);
@@ -201,6 +203,16 @@ export default function ScrollView() {
           }
           return ;
         }
+      }
+    } else if (e.key === "ArrowUp") {
+      const nextInfo = nvx?.current.up(document.activeElement);
+      if (nextInfo) {
+        nextInfo.id.focus({ preventScroll: true });
+      }
+    } else if (e.key === "ArrowDown") {
+      const nextInfo = nvx?.current.down(document.activeElement);
+      if (nextInfo) {
+        nextInfo.id.focus({ preventScroll: true });
       }
     }
   }

@@ -7,7 +7,7 @@ export default function GameBtn({ ref, src }: { ref: Ref<HTMLButtonElement>, src
   const [a2, setA2] = useState(false);
 
   return <button
-    className={`relative w-64 h-64 shrink-0 bg-[#ececec] inset-ring-3 inset-ring-white ${styles.btn} ${a1 ? styles.a : ""}`}
+    className={`nvx2 relative w-64 h-64 shrink-0 bg-[#ececec] inset-ring-3 inset-ring-white ${styles.btn} ${a1 ? styles.a : ""}`}
     ref={ref}
     onKeyDown={onKeyD}
     onClick={onClick}
