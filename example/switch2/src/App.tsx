@@ -6,12 +6,14 @@ import FuncsBar from "./components/feat/funcs-bar";
 import TopBar from "./components/feat/top-bar";
 import ScrollView from "./components/kit/scroll-view";
 import useSound from "./hook/useSound";
-import { HomeNvxContext } from "./context";
+import { HomeNvxContext, FocusedContext } from "./context";
 
 function App() {
   const unlockRef = useSound();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nvxRef = useRef<any>([]);
+  const nvxRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const focusedRef = useRef<any>(new Map());
 
   useEffect(() => {
     const nvx1 = [...document.getElementsByClassName("nvx")];
@@ -27,13 +29,15 @@ function App() {
 
   return (
     <HomeNvxContext value={nvxRef}>
-      <div className="relative w-[1280px] h-[720px] bg-[#ebebeb]">
-        <button ref={unlockRef}>unlock sound</button>
-        <TopBar />
-        <ScrollView />
-        <FuncsBar />
-        <BottomBar />
-      </div>
+      <FocusedContext value={focusedRef}>
+        <div className="relative w-[1280px] h-[720px] bg-[#ebebeb]">
+          <button ref={unlockRef}>unlock sound</button>
+          <TopBar />
+          <ScrollView />
+          <FuncsBar />
+          <BottomBar />
+        </div>
+      </FocusedContext>
     </HomeNvxContext>
   );
 }
