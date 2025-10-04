@@ -28,3 +28,57 @@
     height: calc(100% + 16px);
   }
 }
+
+
+
+.fb {
+  border-radius: 50%;
+  box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity .1s;
+  animation: tint .5s linear alternate infinite;
+}
+
+.r {
+  animation: reboundR .2s linear;
+}
+
+.l {
+  animation: reboundL .2s linear;
+}
+
+.op {
+  opacity: 0;
+}
+
+.fb::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 4px solid white;
+}
+
+@keyframes tint{
+  0%   { border: 4px solid #80f3d9; }
+  100% { border: 4px solid #50afcc; }
+}
+
+@keyframes reboundR {
+  0%   { transform: translateX(0); }
+  2%  { transform: translateX(7px); }
+  35%  { transform: translateX(-4px); } /* 往回一点 */
+  60%  { transform: translateX(3px); } /* 又弹出去 */
+  80%  { transform: translateX(-2px); }
+  100% { transform: translateX(0); }     /* 回到起点 */
+}
+
+@keyframes reboundL {
+  0%   { transform: translateX(0); }
+  2%  { transform: translateX(-7px); }
+  35%  { transform: translateX(4px); } /* 往回一点 */
+  60%  { transform: translateX(-3px); } /* 又弹出去 */
+  80%  { transform: translateX(2px); }
+  100% { transform: translateX(0); }     /* 回到起点 */
+}

@@ -2,10 +2,12 @@ import { use, useEffect, useState, type AnimationEvent, type KeyboardEvent } fro
 import styles from "./index.module.css";
 import { FocusedContext } from "@/context";
 import clsx from "clsx";
+import { SoundContext } from "@/context";
 
-export default function GameBtn({ ref, src }: { ref: (e: HTMLButtonElement | null) => void, src?: string }) {
+export default function GameBtn({ src }: { src?: string }) {
 
   const focusedRef = use(FocusedContext);
+  const soundCtx = use(SoundContext);
 
   const [a1, setA] = useState(false);
   const [a2, setA2] = useState(false);
@@ -26,7 +28,6 @@ export default function GameBtn({ ref, src }: { ref: (e: HTMLButtonElement | nul
     <button
       className={`nvx2 relative w-64 h-64 shrink-0 bg-[#ececec] inset-ring-3 inset-ring-white outline-0 ${styles.btn} ${clsx({ [styles.a]: a1 })}`}
       ref={e => {
-        ref(e);
         focusedRef?.current.set(e, {
           setNL,
           setNR
@@ -43,7 +44,9 @@ export default function GameBtn({ ref, src }: { ref: (e: HTMLButtonElement | nul
         onAnimationEnd={onAE2}></span>
     </button>
     {(loadedFocus || focused) &&
-      <span className={`absolute -inset-2 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR })}`}>
+      <span
+        className={`absolute -inset-2 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR })}`}
+        onAnimationEndCapture={onFocusAnimeEnd}>
         <span
           className={`block w-full h-full ${styles.fb} ${fadeout ? styles.op : ""}`}
           onTransitionEnd={unloadFocus}></span>
@@ -53,6 +56,7 @@ export default function GameBtn({ ref, src }: { ref: (e: HTMLButtonElement | nul
 
   function onKeyD(e: KeyboardEvent) {
     if (a1) return;
+    if (src == null) return;
     if (e.code === "Space" || e.code === "Enter") {
       setA(true);
       e.preventDefault();
@@ -61,12 +65,20 @@ export default function GameBtn({ ref, src }: { ref: (e: HTMLButtonElement | nul
 
   function onClick() {
     if (a1) return;
+    if (src == null) return;
     setA(true);
   }
 
   function onAE(e: AnimationEvent) {
     if (e.animationName === styles.anime0) {
       setA2(true);
+    }
+  }
+
+  function onFocusAnimeEnd(e: AnimationEvent) {
+    if ([styles.reboundR, styles.reboundL].includes(e.animationName)) {
+      setNL(false);
+      setNR(false);
     }
   }
 
@@ -80,6 +92,7 @@ export default function GameBtn({ ref, src }: { ref: (e: HTMLButtonElement | nul
   }
 
   function onFocus() {
+    soundCtx?.playSound("select");
     setF(true);
   }
 

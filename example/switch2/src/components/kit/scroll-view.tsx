@@ -1,4 +1,3 @@
-import naviix from "naviix";
 import { use, useEffect, useRef, type KeyboardEvent } from "react";
 import GameBtn from "./game-btn";
 import { HomeNvxContext, FocusedContext } from "@/context";
@@ -7,35 +6,25 @@ import { HomeNvxContext, FocusedContext } from "@/context";
 export default function ScrollView() {
   const games = new Array(12).fill(null);
   games[0] = "/src/assets/game/tok.avif";
-  const gamesE = useRef<(HTMLButtonElement)[]>([]);
   const wrapE = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const x = useRef<any>(null);
   const nvx = use(HomeNvxContext);
   const focusRef = use(FocusedContext);
-
-  useEffect(() => {
-    x.current = naviix(gamesE.current);
-  }, []);
 
   let isKeyPressed = false;
   let isKeyLongPressed = false;
   const longPressTime = 300;
-  const scrollSpeed = 160;
+  const scrollSpeed = 2660;
   const dynamicSpeed = useRef(-1);
-  const focusInterval = 84; // 1000 / 60 * 5
+  const focusInterval = 56; // 1000 / 60 * 5
   const safeWidth = 93; // 矩形的最右侧要在安全宽度左侧，矩形的最左侧要在安全宽度右侧
   /** 按下方向键后首次聚焦 */
   const focusedFirst = useRef(false);
   const moveRRafId = useRef<number>(-1);
   const safeScrollRafId = useRef<number>(-1);
-  const spf = useRef<number>(-1);
 
   useEffect(() => {
     detectRefreshRate(rate => {
-      spf.current = 1000 / rate;
-      dynamicSpeed.current = Math.round(scrollSpeed * 1000 / rate / focusInterval); // scrollSpeed / Math.round(focusInterval / spf.current)
-      // console.log(Math.round(focusInterval / spf.current), spf.current, dynamicSpeed.current)
+      dynamicSpeed.current = Math.round(scrollSpeed / rate); // scrollSpeed / Math.round(focusInterval / spf.current)
     });
     function detectRefreshRate(callback: (rate: number) => void, sampleCount = 60) {
       let times: number[] = [];
@@ -71,7 +60,7 @@ export default function ScrollView() {
     onKeyUp={keyUp}>
     {games.map((g, i) => <GameBtn
       src={g}
-      ref={e => { if(e) gamesE.current[i] = e }} key={i} />)}
+      key={i} />)}
   </div>;
 
   function keyUp(e: KeyboardEvent) {
@@ -144,7 +133,14 @@ export default function ScrollView() {
           }
           return ;
         } else {
-          focusRef?.current.get(document.activeElement).setNR(true);
+          if (!isKeyLongPressed) {
+            if (cur - lastFocusTime > longPressTime) {
+              isKeyLongPressed = true;
+              focusRef?.current.get(document.activeElement).setNR(true);
+            } else moveRRafId.current = requestAnimationFrame(moveR);
+          } else {
+            focusRef?.current.get(document.activeElement).setNR(true);
+          }
         }
       }
       
@@ -208,7 +204,14 @@ export default function ScrollView() {
           }
           return ;
         } else {
-          focusRef?.current.get(document.activeElement).setNL(true);
+          if (!isKeyLongPressed) {
+            if (cur - lastFocusTime > longPressTime) {
+              isKeyLongPressed = true;
+              focusRef?.current.get(document.activeElement).setNL(true);
+            } else moveRRafId.current = requestAnimationFrame(moveR);
+          } else {
+            focusRef?.current.get(document.activeElement).setNL(true);
+          }
         }
       }
     } else if (e.key === "ArrowUp") {

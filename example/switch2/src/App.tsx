@@ -1,15 +1,14 @@
-import { useEffect, useRef } from "react";
+import { use, useEffect, useRef } from "react";
 import naviix from "naviix";
 import "./App.css";
 import BottomBar from "./components/feat/bottom-bar";
 import FuncsBar from "./components/feat/funcs-bar";
 import TopBar from "./components/feat/top-bar";
 import ScrollView from "./components/kit/scroll-view";
-import useSound from "./hook/useSound";
-import { HomeNvxContext, FocusedContext } from "./context";
+import { HomeNvxContext, FocusedContext, SoundContext } from "./context";
+import SoundProvider from "./components/context/sound";
 
 function App() {
-  const unlockRef = useSound();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const nvxRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,28 +17,46 @@ function App() {
   useEffect(() => {
     const nvx1 = [...document.getElementsByClassName("nvx")];
     const nvx2 = [...document.getElementsByClassName("nvx2")];
+    const nvx3 = [...document.getElementsByClassName("nvx3")]; // 底部功能区
     nvxRef.current = naviix({
       locs: nvx1,
-      subs: {
+      subs: [{
         locs: nvx2,
         wrap: document.getElementById("gms") as HTMLElement,
-      }
+      }, {
+        locs: nvx3,
+        wrap: document.getElementById("funcs") as HTMLElement,
+      }]
     }, { scroll: true });
   }, []);
 
   return (
     <HomeNvxContext value={nvxRef}>
       <FocusedContext value={focusedRef}>
-        <div className="relative w-[1280px] h-[720px] bg-[#ebebeb]">
-          <button ref={unlockRef}>unlock sound</button>
-          <TopBar />
-          <ScrollView />
-          <FuncsBar />
-          <BottomBar />
-        </div>
+        <SoundProvider>
+          <div className="relative w-[1280px] h-[720px] bg-[#ebebeb]">
+            <UnlockBtn />
+            <TopBar />
+            <ScrollView />
+            <FuncsBar />
+            <BottomBar />
+          </div>
+        </SoundProvider>
       </FocusedContext>
     </HomeNvxContext>
   );
+}
+
+function UnlockBtn() {
+
+  const soundContext = use(SoundContext);
+
+  return <button onClick={unlockSound}>unlock sound</button>;
+
+  function unlockSound() {
+    console.log(soundContext?.unlockNLoad)
+    soundContext?.unlockNLoad();
+  }
 }
 
 export default App;

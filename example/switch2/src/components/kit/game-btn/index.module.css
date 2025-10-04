@@ -21,7 +21,7 @@
 
 .fb {
   border-radius: 2px;
-  box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
   pointer-events: none;
   opacity: 1;
   transition: opacity .1s;
