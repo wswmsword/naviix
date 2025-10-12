@@ -126,7 +126,7 @@ export default function naviix(rects, config = {}) {
       const dirXIsWrap = idXInfo.nextWrap[dir];
       const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
       const startLoc = calcLocIfE(idXInfo.origin);
-      if (dirXIsWrap) { // exit
+      if (dirXIsWrap && dirX) { // exit
         // 找到所有父区内所有指向当前区（子区）左边框的矩形
         const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
         return getNextWrapX(allDirWrapX);
