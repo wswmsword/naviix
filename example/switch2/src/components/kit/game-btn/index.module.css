@@ -19,6 +19,12 @@
   animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.gameName {
+  transition: opacity .1s;
+  color: rgb(31, 177, 189);
+  transform: translateY(-50px);
+}
+
 .fb {
   border-radius: 2px;
   box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
@@ -35,6 +41,14 @@
 
 .l {
   animation: reboundL .2s linear;
+}
+
+.u {
+  animation: reboundU .2s linear;
+}
+
+.d {
+  animation: reboundD .2s linear;
 }
 
 .op {
@@ -98,4 +112,22 @@
   60%  { transform: translateX(-3px); } /* 又弹出去 */
   80%  { transform: translateX(2px); }
   100% { transform: translateX(0); }     /* 回到起点 */
+}
+
+@keyframes reboundU {
+  0%   { transform: translateY(0); }
+  2%  { transform: translateY(7px); }
+  35%  { transform: translateY(-4px); } /* 往回一点 */
+  60%  { transform: translateY(3px); } /* 又弹出去 */
+  80%  { transform: translateY(-2px); }
+  100% { transform: translateY(0); }     /* 回到起点 */
+}
+
+@keyframes reboundD {
+  0%   { transform: translateY(0); }
+  2%  { transform: translateY(-7px); }
+  35%  { transform: translateY(4px); } /* 往回一点 */
+  60%  { transform: translateY(-3px); } /* 又弹出去 */
+  80%  { transform: translateY(2px); }
+  100% { transform: translateY(0); }     /* 回到起点 */
 }

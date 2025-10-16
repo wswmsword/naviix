@@ -1,14 +1,16 @@
 import { use, useEffect, useRef, type KeyboardEvent } from "react";
 import GameBtn from "./game-btn";
-import { HomeNvxContext, FocusedContext } from "@/context";
+import { HomeNvxContext, BorderAnimeContext } from "@/context";
 
 /** 长按则滚动，滚动速度由焦点聚焦导航的速度一致，点按有独立的滚动速度，raf 实现 */
 export default function ScrollView() {
-  const games = new Array(12).fill(null);
-  games[0] = "/src/assets/game/tok.avif";
+  const games = [{
+    src: "/src/assets/game/tok.avif",
+    name: "塞尔达传说 王国之泪",
+  }, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
   const wrapE = useRef<HTMLDivElement>(null);
   const nvx = use(HomeNvxContext);
-  const focusRef = use(FocusedContext);
+  const focusRef = use(BorderAnimeContext);
 
   let isKeyPressed = false;
   let isKeyLongPressed = false;
@@ -59,7 +61,8 @@ export default function ScrollView() {
     onKeyDown={keyNav}
     onKeyUp={keyUp}>
     {games.map((g, i) => <GameBtn
-      src={g}
+      src={g.src}
+      name={g.name}
       key={i} />)}
   </div>;
 
@@ -136,10 +139,10 @@ export default function ScrollView() {
           if (!isKeyLongPressed) {
             if (cur - lastFocusTime > longPressTime) {
               isKeyLongPressed = true;
-              focusRef?.current.get(document.activeElement).setNR(true);
+              focusRef?.current.get(document.activeElement).right(true);
             } else moveRRafId.current = requestAnimationFrame(moveR);
           } else {
-            focusRef?.current.get(document.activeElement).setNR(true);
+            focusRef?.current.get(document.activeElement).right(true);
           }
         }
       }
@@ -207,22 +210,12 @@ export default function ScrollView() {
           if (!isKeyLongPressed) {
             if (cur - lastFocusTime > longPressTime) {
               isKeyLongPressed = true;
-              focusRef?.current.get(document.activeElement).setNL(true);
+              focusRef?.current.get(document.activeElement).left(true);
             } else moveRRafId.current = requestAnimationFrame(moveR);
           } else {
-            focusRef?.current.get(document.activeElement).setNL(true);
+            focusRef?.current.get(document.activeElement).left(true);
           }
         }
-      }
-    } else if (e.key === "ArrowUp") {
-      const nextInfo = nvx?.current.up(document.activeElement);
-      if (nextInfo) {
-        nextInfo.id.focus({ preventScroll: true });
-      }
-    } else if (e.key === "ArrowDown") {
-      const nextInfo = nvx?.current.down(document.activeElement);
-      if (nextInfo) {
-        nextInfo.id.focus({ preventScroll: true });
       }
     }
   }
@@ -233,6 +226,7 @@ export default function ScrollView() {
   }
 
   /** 元素部分进入视图 */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function isElementPartiallyVisibleInHorizontalView(el: HTMLElement, container: HTMLElement) {
     const elLeft = el.offsetLeft;
     const elRight = elLeft + el.offsetWidth;
@@ -255,6 +249,7 @@ export default function ScrollView() {
   }
 
   /** 元素完全进入视图 */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function isElementInHorizontalView(el: HTMLElement, container: HTMLElement) {
     const elLeft = el.offsetLeft;
     const elRight = elLeft + el.offsetWidth;

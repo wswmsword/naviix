@@ -5,8 +5,9 @@ import BottomBar from "./components/feat/bottom-bar";
 import FuncsBar from "./components/feat/funcs-bar";
 import TopBar from "./components/feat/top-bar";
 import ScrollView from "./components/kit/scroll-view";
-import { HomeNvxContext, FocusedContext, SoundContext } from "./context";
+import { HomeNvxContext, BorderAnimeContext, SoundContext } from "./context";
 import SoundProvider from "./components/context/sound";
+import HomeKey from "./components/feat/home-key";
 
 function App() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,17 +33,17 @@ function App() {
 
   return (
     <HomeNvxContext value={nvxRef}>
-      <FocusedContext value={focusedRef}>
+      <BorderAnimeContext value={focusedRef}>
         <SoundProvider>
-          <div className="relative w-[1280px] h-[720px] bg-[#ebebeb]">
+          <HomeKey>
             <UnlockBtn />
             <TopBar />
             <ScrollView />
             <FuncsBar />
             <BottomBar />
-          </div>
+          </HomeKey>
         </SoundProvider>
-      </FocusedContext>
+      </BorderAnimeContext>
     </HomeNvxContext>
   );
 }

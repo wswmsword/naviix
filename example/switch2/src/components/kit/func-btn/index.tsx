@@ -2,21 +2,23 @@ import { cn } from "@/lib/utils"
 import styles from "./index.module.css";
 import { useRef, useState, type KeyboardEvent, type MouseEvent, type AnimationEvent, useEffect, use } from "react";
 import clsx from "clsx";
-import { FocusedContext } from "@/context";
+import { BorderAnimeContext } from "@/context";
 
 /** 伴随按钮动画结束执行操作，或延迟指定时间执行操作（延迟时间内忽略其它操作） */
-export default function FuncBtn({ className, children, onClick: _oc }: React.ComponentProps<"button">) {
+export default function FuncBtn({ className, children, onClick: _oc, name }: React.ComponentProps<"button">) {
 
   const [animating, setA] = useState(false);
   const clickE = useRef<MouseEvent<HTMLButtonElement>>(null);
 
-  const focusedRef = use(FocusedContext);
+  const focusedRef = use(BorderAnimeContext);
 
   const [focused, setF] = useState(false);
   const [loadedFocus, setL] = useState(false);
 
   const [noL, setNL] = useState(false);
   const [noR, setNR] = useState(false);
+  const [noU, setNU] = useState(false);
+  const [noD, setND] = useState(false);
 
   const fadeout = loadedFocus === true && focused === false;
 
@@ -37,22 +39,25 @@ export default function FuncBtn({ className, children, onClick: _oc }: React.Com
         className)}
       ref={e => {
         focusedRef?.current.set(e, {
-          setNL,
-          setNR
+          left: setNL,
+          right: setNR,
+          up: setNU,
+          down: setND,
         });
       }}>
-      <span className="relative">
+      <span className="relative text-base">
         { children }
       </span>
     </button>
     {(loadedFocus || focused) &&
       <span
-        className={`absolute -inset-2 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR })}`}
+        className={`absolute -inset-2 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
         onAnimationEndCapture={onFocusAnimeEnd}>
         <span
           className={`block w-full h-full ${styles.fb} ${fadeout ? styles.op : ""}`}
           onTransitionEnd={unloadFocus}></span>
       </span>}
+    {name && <div className={`absolute text-2xl left-0 bottom-0 flex flex-nowrap justify-center w-full whitespace-nowrap ${styles.funcName} ${focused ? "opacity-100" : "opacity-0"}`}>{name}</div>}
   </div>;
 
   function onKeyD(e: KeyboardEvent) {
@@ -75,9 +80,11 @@ export default function FuncBtn({ className, children, onClick: _oc }: React.Com
   }
 
   function onFocusAnimeEnd(e: AnimationEvent) {
-    if ([styles.reboundR, styles.reboundL].includes(e.animationName)) {
+    if ([styles.reboundR, styles.reboundL, styles.reboundU, styles.reboundD].includes(e.animationName)) {
       setNL(false);
       setNR(false);
+      setNU(false);
+      setND(false);
     }
   }
 
