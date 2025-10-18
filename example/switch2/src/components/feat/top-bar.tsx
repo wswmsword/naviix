@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import UsrBtn from "../kit/usr-btn";
 
 
 export default function TopBar() {
@@ -13,8 +14,8 @@ export default function TopBar() {
 
   return <div className="absolute w-full flex justify-between px-[60px] top-[35px]">
     <div className="flex gap-[10px]">
-      <button className="nvx w-[60px] h-[60px] border-[3px] border-white rounded-full"></button>
-      <button className="nvx w-[60px] h-[60px] border-[3px] border-white rounded-full"></button>
+      <UsrBtn src="/src/assets/usr/u1.png" name="wsWmsword 的页面" className="bg-pink-300" />
+      <UsrBtn src="/src/assets/usr/u2.png" name="Wind 的页面" className="bg-blue-500" />
     </div>
     <div className="flex items-center gap-[22px]">
       <div className="text-[#2c2c2c] text-base">{clock}</div>

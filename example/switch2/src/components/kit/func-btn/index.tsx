@@ -26,15 +26,16 @@ export default function FuncBtn({ className, children, onClick: _oc, name }: Rea
     if (focused) setL(true);
   }, [focused]);
 
-  return <div className="relative text-[0px]">
+  return <div className="relative text-[0px] w-[72px] h-[72px]">
     <button
       onKeyDown={onKeyD}
       onClick={onClick}
       onFocus={onFocus}
       onBlur={onBlur}
       onAnimationEnd={onAE}
-      className={cn("nvx3 relative w-[72px] h-[72px] rounded-full bg-white border border-[#dfdfdf] flex items-center justify-center outline-0",
+      className={cn("nvx3 absolute inset-0 rounded-full bg-white border border-[#dfdfdf] flex items-center justify-center outline-0",
         animating ? styles.animating : "",
+        focused ? styles.focused : "",
         styles.btn,
         className)}
       ref={e => {
@@ -51,12 +52,13 @@ export default function FuncBtn({ className, children, onClick: _oc, name }: Rea
     </button>
     {(loadedFocus || focused) &&
       <span
-        className={`absolute -inset-2 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
+        className={`absolute -inset-2 text-[0px] pointer-events-none z-10 ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
         onAnimationEndCapture={onFocusAnimeEnd}>
         <span
           className={`block w-full h-full ${styles.fb} ${fadeout ? styles.op : ""}`}
           onTransitionEnd={unloadFocus}></span>
       </span>}
+    {/* 标题 */}
     {name && <div className={`absolute text-2xl left-0 bottom-0 flex flex-nowrap justify-center w-full whitespace-nowrap ${styles.funcName} ${focused ? "opacity-100" : "opacity-0"}`}>{name}</div>}
   </div>;
 
