@@ -15,11 +15,11 @@ describe("naviix", function () {
     assert.equal(res.get(s1).right.id, s2);
     assert.equal(res.get(s2).left.id, s1);
     assert.equal(res.get(s1).left, undefined);
-    assert.equal(res.get(s1).top, undefined);
-    assert.equal(res.get(s1).bottom, undefined);
+    assert.equal(res.get(s1).up, undefined);
+    assert.equal(res.get(s1).down, undefined);
     assert.equal(res.get(s2).right, undefined);
-    assert.equal(res.get(s2).top, undefined);
-    assert.equal(res.get(s2).bottom, undefined);
+    assert.equal(res.get(s2).up, undefined);
+    assert.equal(res.get(s2).down, undefined);
   });
 
   /**
@@ -451,6 +451,24 @@ describe("naviix", function () {
     assert.equal(left("r6").id, r2);
     assert.equal(up(r2).id, r1);
     assert.equal(right(r1).id, "r6");
+  });
+
+  /**
+   *   +-----------+
+   *   |     1     |
+   *   |           |
+   *   +-----------+
+   * +---+ +---+ +---+
+   * | 2 | | 3 | | 4 |
+   * +---+ +---+ +---+
+   */
+  it("整体导航", function() {
+    const r2 = [1, 1, 1, 1];
+    const r3 = [4, 1, 1, 1];
+    const r4 = [7, 1, 1, 1];
+    const r1 = [4, 5, 3, 1];
+    const res = naviix([r1, r2, r3, r4]);
+    assert.equal(res.get(r1).down.id, r3);
   });
 }); 
 

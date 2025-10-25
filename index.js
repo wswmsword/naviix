@@ -140,19 +140,23 @@ export default function naviix(rects, config = {}) {
         let res = null;
         // next direction element
         let minLDis = Infinity;
+        let gotFirstProj = false;
         for (let i = 0; i < allDirWrapX.length; ++ i) {
           const r2Info = x.get(allDirWrapX[i]);
           const r2 = r2Info.origin;
           const targetLoc = calcLocIfE(r2);
           const r2WrapInfo = x.get(r2Info.wrapId);
           if (r2WrapInfo != null && !isVisualElement(targetLoc, calcLocIfE(r2WrapInfo.origin))) continue;
-          const { dis, isProj } = calcMinDis(startLoc, targetLoc);
+          const { dis, isProj, isRestrictProj } = calcMinDis(startLoc, targetLoc);
 
-          if (dis < minLDis) {
+          if (dis < minLDis || (gotFirstProj && isRestrictProj && dis <= minLDis)) {
             minLDis = dis;
             res = r2;
-            if (isProj) break;
-          }
+            if (isProj) {
+              if (isRestrictProj || gotFirstProj) break;
+              gotFirstProj = true;
+            }
+          } else if (gotFirstProj) break;
         }
         return res;
       }
@@ -405,33 +409,43 @@ function getXBySimple(rects, wrap, subWraps = []) {
     let minDownDis = Infinity;
     let downS = wrap; // 默认指向包裹层
     let gotDown = false;
+    let gotFirstDProj = false; // 获得过投影后增加 1 次比较
     for (let i = sOrderY - 1; i > -1; -- i) { // 从距离元素最近的位置寻找
       const s2 = sortedY[i];
-      const { dis, isProj } = getMinDownDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinDownDis(s.loc, s2.loc);
 
-      if (dis < minDownDis) {
+      if (dis < minDownDis || (gotFirstDProj && isRestrictProj && dis <= minDownDis)) {
         gotDown = true;
         downS = s2;
         minDownDis = dis;
-        surroundedI += isProj;
-        if (isProj) break; // 投影距离是最短距离，无需后续比较
-      }
+        if (isProj) {
+          if (isRestrictProj || gotFirstDProj) {
+            break; // 投影距离是最短距离，无需后续比较
+          }
+          surroundedI += 1;
+          gotFirstDProj = true;
+        }
+      } else if (gotFirstDProj) break; // 已经有过投影后的任何否定情况，直接 break 不再比较
     }
 
     // next up element
     let minUpDis = Infinity;
     let upS = wrap;
     let gotUp = false;
+    let gotFirstUProj = false; // 获得过投影后增加 1 次比较
     for (let i = sOrderY + 1; i < sortedY.length; ++ i) {
       const s2 = sortedY[i];
-      const { dis, isProj } = getMinUpDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinUpDis(s.loc, s2.loc);
 
-      if (dis < minUpDis) {
+      if (dis < minUpDis || (gotFirstUProj && isRestrictProj && dis <= minDownDis)) {
         gotUp = true;
         upS = s2;
         minUpDis = dis;
-        surroundedI += isProj;
-        if (isProj) break;
+        if (isProj) {
+          if (isRestrictProj || gotFirstUProj) break;
+          surroundedI += isProj;
+          gotFirstUProj = true;
+        } else if (gotFirstUProj) break;
       }
     }
 
@@ -439,34 +453,42 @@ function getXBySimple(rects, wrap, subWraps = []) {
     let minLDis = Infinity;
     let lS = wrap;
     let gotLeft = false;
+    let gotFirstLProj = false;
     for (let i = sOrderX - 1; i > -1; -- i) {
       const s2 = sortedX[i];
-      const { dis, isProj } = getMinLeftDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinLeftDis(s.loc, s2.loc);
 
-      if (dis < minLDis) {
+      if (dis < minLDis || (gotFirstLProj && isRestrictProj && dis <= minDownDis)) {
         gotLeft = true;
         lS = s2;
         minLDis = dis;
-        surroundedI += isProj;
-        if (isProj) break;
-      }
+        if (isProj) {
+          if (isRestrictProj || gotFirstLProj) break;
+          surroundedI += isProj;
+          gotFirstLProj = true;
+        }
+      } else if (gotFirstLProj) break;
     }
 
     // next right element
     let minRDis = Infinity;
     let rS = wrap;
     let gotRight = false;
+    let gotFirstRProj = false;
     for (let i = sOrderX + 1; i < sortedX.length; ++ i) {
       const s2 = sortedX[i];
-      const { dis, isProj } = getMinRightDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinRightDis(s.loc, s2.loc);
 
-      if (dis < minRDis) {
+      if (dis < minRDis || (gotFirstRProj && isRestrictProj && dis <= minDownDis)) {
         gotRight = true;
         rS = s2;
         minRDis = dis;
-        surroundedI += isProj;
-        if (isProj) break;
-      }
+        if (isProj) {
+          if (isRestrictProj || gotFirstRProj) break;
+          surroundedI += isProj;
+          gotFirstRProj = true;
+        }
+      } else if (gotFirstRProj) break;
     }
 
     dirMap.set(s.id, {
@@ -507,6 +529,7 @@ function getMinDownDis(s, s2) {
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
   let isProj = false;
+  let isRestrictProj = false;
   if (y > y2) { // is below
 
     if (x2 - t1a > x + t1) { // is right corner
@@ -522,12 +545,13 @@ function getMinDownDis(s, s2) {
       }
     } else { // is project
       isProj = true;
+      isRestrictProj = (x2 - t1a >= x - t1) && (x2 + t1a <= x + t1);
       dis = Math.pow(y - t2 - y2 - t2a, 2);
       if (y2 + t2a > y - t2) dis = -dis;
     }
   }
 
-  return { dis, isProj };
+  return { dis, isProj, isRestrictProj };
 }
 
 function getMinUpDis(s, s2) {
@@ -535,6 +559,7 @@ function getMinUpDis(s, s2) {
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
   let isProj = false;
+  let isRestrictProj = false;
   if (y < y2) { // is above
     if (x2 - t1a > x + t1) { // is right corner
       if (x2 - t1a - x - t1 < y2 - t2a - y - t2) {
@@ -548,9 +573,10 @@ function getMinUpDis(s, s2) {
       dis = Math.pow(y2 - t2a - y - t2, 2);
       if (y2 - t2a < y + t2) dis = -dis;
       isProj = true;
+      isRestrictProj = (x2 - t1a >= x - t1) && (x2 + t1a <= x + t1);
     }
   }
-  return { dis, isProj };
+  return { dis, isProj, isRestrictProj };
 }
 
 function getMinLeftDis(s, s2) {
@@ -558,6 +584,7 @@ function getMinLeftDis(s, s2) {
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
   let isProj = false;
+  let isRestrictProj = false;
   if (x > x2) { // is left
     if (y2 - t2a > y + t2) { // is top corner
       if (y2 - t2a - y - t2 < x - t1 - x2 - t1a) { // closer x
@@ -571,9 +598,10 @@ function getMinLeftDis(s, s2) {
       dis = Math.pow(x - t1 - x2 - t1a, 2);
       if (x2 + t1a > x - t1) dis = -dis;
       isProj = true;
+      isRestrictProj = (y2 - t2a >= y - t2) && (y2 + t2a <= y + t2);
     }
   }
-  return { dis, isProj };
+  return { dis, isProj, isRestrictProj };
 }
 
 function getMinRightDis(s, s2) {
@@ -581,6 +609,7 @@ function getMinRightDis(s, s2) {
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
   let isProj = false;
+  let isRestrictProj = false;
   if (x2 > x) { // is right
     if (y2 - t2a > y + t2) { // is top corner
       if (y2 - t2a - y - t2 < x2 - t1a - x - t1) { // closer x
@@ -595,10 +624,11 @@ function getMinRightDis(s, s2) {
       if (x2 - t1a < x + t1) // overlap
         dis = -dis;
       isProj = true;
+      isRestrictProj = (y2 - t2a >= y - t2) && (y2 + t2a <= y + t2);
     }
   }
 
-  return { dis, isProj };
+  return { dis, isProj, isRestrictProj };
 }
 
 function getDistance(x1, y1, x2, y2) {
