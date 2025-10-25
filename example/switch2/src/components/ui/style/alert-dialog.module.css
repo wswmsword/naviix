@@ -1,36 +1,15 @@
-.btn {
-  /* box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.1); */
-  transition: inset .1s;
-}
-
-.a {
-  animation: anime0 .2s;
-}
-
-.animeP {
-  opacity: 0.5;
-}
-
-.animeP.a2 {
-  animation: anime 1s;
-  /* https://easingwizard.com/ */
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.gameName {
-  transition: opacity .1s;
-  color: rgb(31, 177, 189);
-  transform: translateY(-50px);
-}
-
 .fb {
   box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
   pointer-events: none;
   opacity: 1;
   transition: opacity .1s;
-  border-radius: 50%;
+  border-radius: 3px;
   animation: tint .5s linear alternate infinite;
   /* , rebound .2s linear */
+}
+
+.op {
+  opacity: 0;
 }
 
 .r {
@@ -47,47 +26,6 @@
 
 .d {
   animation: reboundD .2s linear;
-}
-
-.op {
-  opacity: 0;
-}
-
-.funcName {
-  transition: opacity .1s;
-  color: rgb(31, 177, 189);
-  transform: translateY(42px);
-  font-weight: 300;
-  font-size: 24px;
-}
-
-@keyframes anime0 {
-  from {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(.87);
-  }
-  95% {
-    transform: scale(1.08);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@keyframes anime {
-  from {
-    opacity: .5;
-    transform: scale(1);
-  }
-  15% {
-    opacity: .5;
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.43);
-  }
 }
 
 @keyframes tint{

@@ -1,8 +1,10 @@
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
-
+import styles from "./style/alert-dialog.module.css";
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import naviix from "../../../../.."
+import { BorderAnimeContext } from "@/context";
+import clsx from "clsx";
 
 function AlertDialog({
   ...props
@@ -52,7 +54,7 @@ function AlertDialogContent({
       <AlertDialogPrimitive.Content
         data-slot="alert-dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          "bg-[rgb(240,240,240)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-[770px] translate-x-[-50%] translate-y-[-50%] rounded-[4px] border shadow-lg duration-200",
           className
         )}
         {...props}
@@ -68,7 +70,7 @@ function AlertDialogHeader({
   return (
     <div
       data-slot="alert-dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col text-left py-[60px] px-[205px]", className)}
       {...props}
     />
   )
@@ -78,11 +80,54 @@ function AlertDialogFooter({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
+  const wrapRef = React.useRef<HTMLDivElement>(null);
+  const focusedRef = React.use(BorderAnimeContext);
+
+  React.useEffect(() => {
+    const wrapE = wrapRef.current;
+    const parentE = wrapE?.parentElement;
+    wrapE?.addEventListener("keydown", onKeyDown);
+    parentE?.addEventListener("keydown", onKeyDownP);
+    const rs = [...(wrapE?.children || [])];
+    const nvx = naviix(rs);
+    const keyMap = new Map([
+      ["ArrowRight", "right"],
+      ["ArrowLeft", "left"],
+      ["ArrowUp", "up"],
+      ["ArrowDown", "down"],
+    ])
+    return () => {
+      wrapE?.removeEventListener("keydown", onKeyDown);
+      parentE?.removeEventListener("keydown", onKeyDownP);
+    }
+
+    function onKeyDown(e: KeyboardEvent) {
+      e.stopImmediatePropagation();
+      const focusInfo = nvx.get(e.target) || {};
+      const dir = keyMap.get(e.key) as "left" | "right" | "up" | "down";
+      if (dir) {
+        if (focusInfo[dir])
+          focusInfo[dir].id.focus();
+        else {
+          focusedRef?.current.get(e.target)[dir](true);
+        }
+      }
+    }
+
+    function onKeyDownP(e: KeyboardEvent) {
+      e.stopImmediatePropagation();
+      (wrapE?.childNodes[0] as HTMLButtonElement).focus();
+    }
+  }, []);
+
   return (
     <div
+      // onKeyDown={test}
+      ref={wrapRef}
       data-slot="alert-dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        "flex flex-row border-t border-[rgb(205,205,205)] [&>*:not(:first-child)]:border-l [&>*:not(:first-child)]:border-[rgb(205,205,205)]",
         className
       )}
       {...props}
@@ -118,26 +163,150 @@ function AlertDialogDescription({
 
 function AlertDialogAction({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
+
+  const focusedRef = React.use(BorderAnimeContext);
+
+  const [focused, setF] = React.useState(false);
+  const [loadedFocus, setL] = React.useState(false);
+
+  const [noL, setNL] = React.useState(false);
+  const [noR, setNR] = React.useState(false);
+  const [noU, setNU] = React.useState(false);
+  const [noD, setND] = React.useState(false);
+
+  const fadeout = loadedFocus === true && focused === false;
+
+  React.useEffect(() => {
+    if (focused) setL(true);
+  }, [focused]);
+
   return (
     <AlertDialogPrimitive.Action
-      className={cn(buttonVariants(), className)}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      ref={e => {
+        if (e) {
+          focusedRef?.current.set(e, {
+            left: setNL,
+            right: setNR,
+            up: setNU,
+            down: setND,
+          });
+        }
+      }}
+      className={cn("relative w-full h-[70px] text-[rgb(63,84,209)] text-2xl outline-none focus:bg-white", className)}
       {...props}
-    />
+    >
+      {children}
+      {(loadedFocus || focused) && <>
+        <span
+          className={`absolute -inset-0.5 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
+          onAnimationEndCapture={onFocusAnimeEnd}>
+          <span
+            className={`block w-full h-full ${styles.fb} ${fadeout ? styles.op : ""}`}
+            onTransitionEnd={unloadFocus}></span>
+        </span>
+      </>}
+    </AlertDialogPrimitive.Action>
   )
+
+  function onFocusAnimeEnd(e: React.AnimationEvent) {
+    if ([styles.reboundR, styles.reboundL, styles.reboundU, styles.reboundD].includes(e.animationName)) {
+      setNL(false);
+      setNR(false);
+      setNU(false);
+      setND(false);
+    }
+  }
+
+  function unloadFocus() {
+    setL(false);
+  }
+
+  function onFocus() {
+    setF(true);
+  }
+
+  function onBlur() {
+    setF(false);
+  }
 }
 
 function AlertDialogCancel({
   className,
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Cancel>) {
+
+  const focusedRef = React.use(BorderAnimeContext);
+
+  const [focused, setF] = React.useState(false);
+  const [loadedFocus, setL] = React.useState(false);
+
+  const [noL, setNL] = React.useState(false);
+  const [noR, setNR] = React.useState(false);
+  const [noU, setNU] = React.useState(false);
+  const [noD, setND] = React.useState(false);
+
+  const fadeout = loadedFocus === true && focused === false;
+
+  React.useEffect(() => {
+    if (focused) setL(true);
+  }, [focused]);
+
   return (
     <AlertDialogPrimitive.Cancel
-      className={cn(buttonVariants({ variant: "outline" }), className)}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      ref={e => {
+        if (e) {
+          focusedRef?.current.set(e, {
+            left: setNL,
+            right: setNR,
+            up: setNU,
+            down: setND,
+          });
+        }
+      }}
+      className={cn("relative w-full h-[70px] text-[rgb(63,84,209)] text-2xl outline-none focus:bg-white", className)}
       {...props}
-    />
+    >
+      {children}
+      {(loadedFocus || focused) && <>
+        <span
+          className={`absolute -inset-0.5 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
+          onAnimationEndCapture={onFocusAnimeEnd}>
+          <span
+            className={`block w-full h-full ${styles.fb} ${fadeout ? styles.op : ""}`}
+            onTransitionEnd={unloadFocus}></span>
+        </span>
+      </>}
+    </AlertDialogPrimitive.Cancel>
   )
+
+  function onFocusAnimeEnd(e: React.AnimationEvent) {
+    if ([styles.reboundR, styles.reboundL, styles.reboundU, styles.reboundD].includes(e.animationName)) {
+      setNL(false);
+      setNR(false);
+      setNU(false);
+      setND(false);
+    }
+  }
+
+  function unloadFocus() {
+    setL(false);
+  }
+
+  function onFocus() {
+    setF(true);
+  }
+
+  function onBlur() {
+    setF(false);
+  }
 }
 
 export {
