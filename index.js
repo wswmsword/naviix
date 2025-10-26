@@ -112,15 +112,15 @@ export default function naviix(rects, config = {}) {
       scroll(newX) {
         updateRawXByScroll(x, newX);
       },
-      left: id => getScrollDirX(id, "left", "right", getMinLeftDis),
-      up: id => getScrollDirX(id, "up", "down", getMinUpDis),
-      right: id => getScrollDirX(id, "right", "left", getMinRightDis),
-      down: id => getScrollDirX(id, "down", "up", getMinDownDis),
+      left: (id, fuzzy) => getScrollDirX(id, "left", "right", getMinLeftDis, fuzzy),
+      up: (id, fuzzy) => getScrollDirX(id, "up", "down", getMinUpDis, fuzzy),
+      right: (id, fuzzy) => getScrollDirX(id, "right", "left", getMinRightDis, fuzzy),
+      down: (id, fuzzy) => getScrollDirX(id, "down", "up", getMinDownDis, fuzzy),
       update,
       more,
     };
 
-    function getScrollDirX(id, dir, antiDir, calcMinDis) {
+    function getScrollDirX(id, dir, antiDir, calcMinDis, fuzzy) {
       const idXInfo = x.get(id);
       const dirX = idXInfo[dir];
       const dirXIsWrap = idXInfo.nextWrap[dir];
@@ -147,8 +147,7 @@ export default function naviix(rects, config = {}) {
           const targetLoc = calcLocIfE(r2);
           const r2WrapInfo = x.get(r2Info.wrapId);
           if (r2WrapInfo != null && !isVisualElement(targetLoc, calcLocIfE(r2WrapInfo.origin))) continue;
-          const { dis, isProj, isRestrictProj } = calcMinDis(startLoc, targetLoc);
-
+          const { dis, isProj, isRestrictProj } = calcMinDis(startLoc, targetLoc, fuzzy);
           if (dis < minLDis || (gotFirstProj && isRestrictProj && dis <= minLDis)) {
             minLDis = dis;
             res = r2;
@@ -535,7 +534,7 @@ function getXBySimple(rects, wrap, subWraps = []) {
   return { x: dirMap };
 }
 
-function getMinDownDis(s, s2) {
+function getMinDownDis(s, s2, fuzzy) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
@@ -545,13 +544,13 @@ function getMinDownDis(s, s2) {
 
     if (x2 - t1a > x + t1) { // is right corner
 
-      if (x2 - t1a - x - t1 < y - t2 - y2 - t2a) {
+      if (fuzzy || x2 - t1a - x - t1 < y - t2 - y2 - t2a) {
 
         dis = getDistance(x + t1, y - t2, x2 - t1a, y2 + t2a);
       }
     } else if (x2 + t1a < x - t1) { // is left corner
 
-      if (x - t1 - x2 - t1a < y - t2 - y2 - t2a) {
+      if (fuzzy || x - t1 - x2 - t1a < y - t2 - y2 - t2a) {
         dis = getDistance(x + t1, y - t2, x2 + t1a, y2 + t2a);
       }
     } else { // is project
@@ -565,7 +564,7 @@ function getMinDownDis(s, s2) {
   return { dis, isProj, isRestrictProj };
 }
 
-function getMinUpDis(s, s2) {
+function getMinUpDis(s, s2, fuzzy) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
@@ -573,11 +572,11 @@ function getMinUpDis(s, s2) {
   let isRestrictProj = false;
   if (y < y2) { // is above
     if (x2 - t1a > x + t1) { // is right corner
-      if (x2 - t1a - x - t1 < y2 - t2a - y - t2) {
+      if (fuzzy || x2 - t1a - x - t1 < y2 - t2a - y - t2) {
         dis = getDistance(x + t1, y + t2, x2 - t1a, y2 - t2a);
       }
     } else if (x2 + t1a < x - t1) { // is left corner
-      if (x - t1 - x2 - t1a < y2 - t2a - y - t2) {
+      if (fuzzy || x - t1 - x2 - t1a < y2 - t2a - y - t2) {
         dis = getDistance(x - t1, y + t2, x2 + t1a, y2 - t2a);
       }
     } else { // is project
@@ -590,7 +589,7 @@ function getMinUpDis(s, s2) {
   return { dis, isProj, isRestrictProj };
 }
 
-function getMinLeftDis(s, s2) {
+function getMinLeftDis(s, s2, fuzzy) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
@@ -598,11 +597,11 @@ function getMinLeftDis(s, s2) {
   let isRestrictProj = false;
   if (x > x2) { // is left
     if (y2 - t2a > y + t2) { // is top corner
-      if (y2 - t2a - y - t2 < x - t1 - x2 - t1a) { // closer x
+      if (fuzzy || y2 - t2a - y - t2 < x - t1 - x2 - t1a) { // closer x
         dis = getDistance(x - t1, y + t2, x2 + t1a, y2 - t2a);
       }
     } else if (y2 + t2a < y - t2) { // is bottom corder
-      if (y - t2 - y2 - t2a < x - t1 - x2 - t1a) { // closer x
+      if (fuzzy || y - t2 - y2 - t2a < x - t1 - x2 - t1a) { // closer x
         dis = getDistance(x - t1, y - t2, x2 + t1a, y2 + t2a);
       }
     } else { // is project
@@ -615,7 +614,7 @@ function getMinLeftDis(s, s2) {
   return { dis, isProj, isRestrictProj };
 }
 
-function getMinRightDis(s, s2) {
+function getMinRightDis(s, s2, fuzzy) {
   const [x, y, t1, t2] = s;
   const [x2, y2, t1a, t2a] = s2;
   let dis = Infinity;
@@ -623,11 +622,11 @@ function getMinRightDis(s, s2) {
   let isRestrictProj = false;
   if (x2 > x) { // is right
     if (y2 - t2a > y + t2) { // is top corner
-      if (y2 - t2a - y - t2 < x2 - t1a - x - t1) { // closer x
+      if (fuzzy || y2 - t2a - y - t2 < x2 - t1a - x - t1) { // closer x
         dis = getDistance(x + t1, y + t2, x2 - t1a, y2 - t2a);
       }
     } else if (y2 + t2a < y - t2) { // is bottom corder
-      if (y - t2 - y2 - t2a < x2 - t1a - x - t1) {
+      if (fuzzy || y - t2 - y2 - t2a < x2 - t1a - x - t1) {
         dis = getDistance(x + t1, y - t2, x2 - t1a, y2 + t2a);
       }
     } else {
