@@ -345,7 +345,7 @@ function getX(rects, notRoot) {
       firstInWrap.set(s.wrap.id, s.locs[0]);
     });
     const { x } = getXBySimple(wraps);
-    improveHelperDataByX(x);
+    improveHelperDataByX(x, true);
     mergedX = x;
   }
 
@@ -365,11 +365,22 @@ function getX(rects, notRoot) {
 
   return { x: mergedX, firstInWrap, enterWrapX, exitWrapX, edgeX };
 
-  function improveHelperDataByX(x) {
+  function improveHelperDataByX(x, aryRoot) {
     for(const [xId, xInfo] of x) {
       const _xId = Array.isArray(xId) ? [xId] : xId;
       const { nextWrap, nextSubWrap, wrapId, surrounded, isWrap } = xInfo;
       for(const dir of dirs) {
+        if (aryRoot) {
+          if (!nextWrap[dir]) {
+            const wrapId = xInfo[dir].id;
+            const gotEnterWrapX = enterWrapX.get(wrapId);
+            enterWrapX.set(wrapId, {
+              ...gotEnterWrapX,
+              [dir]: ((gotEnterWrapX && gotEnterWrapX[dir]) || []).concat(_xId),
+            })
+          }
+          continue;
+        }
         if (nextWrap[dir]) {
           const gotExitWrapX = exitWrapX.get(wrapId);
           exitWrapX.set(wrapId, {
