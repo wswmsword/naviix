@@ -108,6 +108,8 @@ export default function naviix(rects, config = {}) {
   }
 
   function scrollReturn(x) {
+    /** 短时记忆 */
+    let momentCache = [];
     return {
       scroll(newX) {
         updateRawXByScroll(x, newX);
@@ -121,6 +123,12 @@ export default function naviix(rects, config = {}) {
     };
 
     function getScrollDirX(id, dir, antiDir, calcMinDis, fuzzy) {
+
+      const [mid, mdir, mtid] = momentCache;
+      if (id === mid && dir === mdir) {
+        momentCache = [mtid, antiDir, mid];
+        return (x.get(mtid) || {}).origin || null;
+      }
       const idXInfo = x.get(id);
       const dirX = idXInfo[dir];
       const dirXIsWrap = idXInfo.nextWrap[dir];
@@ -129,11 +137,15 @@ export default function naviix(rects, config = {}) {
       if (dirXIsWrap && dirX) { // exit
         // 找到所有父区内所有指向当前区（子区）左边框的矩形
         const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
-        return getNextWrapX(allDirWrapX);
+        const target = getNextWrapX(allDirWrapX);
+        if (target) momentCache = [target.id, antiDir, id];
+        return target;
       } else if (dirXIsSubWrap) { // enter
         // 找到子区内所有指向子区右边框的矩形
         const allDirWrapX = getAllEnterWrapX(dirX.id, antiDir);
-        return getNextWrapX(allDirWrapX);
+        const target = getNextWrapX(allDirWrapX);
+        if (target) momentCache = [target.id, antiDir, id];
+        return target;
       } else return dirX;
 
       function getNextWrapX(allDirWrapX) {
