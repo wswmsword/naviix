@@ -70,7 +70,7 @@ export default function FuncBtn({ className, children, onClick: _oc, name }: Rea
       {/* </AlertDialogTrigger> */}
       <AlertDialogContent onCloseAutoFocus={() => trigRef.current?.focus()}>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-2xl text-[rgb(40,40,40)] gap-1 flex flex-col font-normal">
+          <AlertDialogTitle className="text-[24px] text-[rgb(40,40,40)] gap-[4px] flex flex-col font-normal">
             <div>主机不会进入休眠模式。</div>
             <div>所以也没有解除休眠模式功能。</div>
           </AlertDialogTitle>
@@ -86,14 +86,14 @@ export default function FuncBtn({ className, children, onClick: _oc, name }: Rea
     </AlertDialog>
     {(loadedFocus || focused) &&
       <span
-        className={`absolute -inset-2 text-[0px] pointer-events-none z-10 ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
+        className={`absolute -inset-[8px] text-[0px] pointer-events-none z-10 ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
         onAnimationEndCapture={onFocusAnimeEnd}>
         <span
           className={`block w-full h-full ${styles.fb} ${fadeout ? styles.op : ""}`}
           onTransitionEnd={unloadFocus}></span>
       </span>}
     {/* 标题 */}
-    {name && <div className={`absolute text-2xl left-0 bottom-0 flex flex-nowrap justify-center w-full whitespace-nowrap ${styles.funcName} ${focused ? "opacity-100" : "opacity-0"}`}>{name}</div>}
+    {name && <div className={`absolute text-[24px] left-0 bottom-0 flex flex-nowrap justify-center w-full whitespace-nowrap ${styles.funcName} ${focused ? "opacity-100" : "opacity-0"}`}>{name}</div>}
   </div>;
 
   function onKeyD(e: KeyboardEvent) {

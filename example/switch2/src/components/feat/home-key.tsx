@@ -20,7 +20,7 @@ export default function HomeKey({ children }: { children: ReactNode }) {
   const focusRef = use(BorderAnimeContext);
 
   return <div
-    className="relative w-[1280px] h-[720px] bg-[#ebebeb]"
+    className="relative w-full h-full bg-[#ebebeb]"
     onKeyDown={onKeydown}
     onKeyUp={onKeyup}>
     { children }
@@ -51,7 +51,7 @@ export default function HomeKey({ children }: { children: ReactNode }) {
 
     function focusNextWithCallback(callback?: () => void) {
       const curE = document.activeElement;
-      const nextInfo = nvx?.current[dir as string](curE);
+      const nextInfo = nvx?.current[dir as string](curE, true);
       if (nextInfo) {
         nextInfo.id.focus({ preventScroll: true });
         if (callback) callback();

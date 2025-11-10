@@ -12,7 +12,7 @@ export default function TopBar() {
   }, []);
 
 
-  return <div className="absolute w-full flex justify-between px-[60px] top-[35px]">
+  return <div id="usr-bar" className="absolute w-full flex justify-between px-[60px] top-[35px]">
     <div className="flex gap-[10px]">
       <UsrBtn src="/src/assets/usr/u1.png" name="wsWmsword 的页面" className="bg-pink-300" />
       <UsrBtn src="/src/assets/usr/u2.png" name="Wind 的页面" className="bg-blue-500" />

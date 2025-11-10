@@ -28,7 +28,7 @@ export default function GameBtn({ src, name }: { src?: string, name?: string }) 
 
   return <div className="relative text-[0px]">
     <button
-      className={`nvx2 relative w-64 h-64 shrink-0 bg-[#ececec] inset-ring-3 inset-ring-white outline-0 ${styles.btn} ${clsx({ [styles.a]: a1 })}`}
+      className={`nvx2 relative w-[256px] h-[256px] shrink-0 bg-[#ececec] inset-ring-3 inset-ring-white outline-0 ${styles.btn} ${clsx({ [styles.a]: a1 })}`}
       ref={e => {
         focusedRef?.current.set(e, {
           left: setNL,
@@ -49,14 +49,14 @@ export default function GameBtn({ src, name }: { src?: string, name?: string }) 
     </button>
     {(loadedFocus || focused) && <>
       <span
-        className={`absolute -inset-2 text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
+        className={`absolute -inset-[8px] text-[0px] pointer-events-none ${clsx({ [styles.l]: noL, [styles.r]: noR, [styles.u]: noU, [styles.d]: noD })}`}
         onAnimationEndCapture={onFocusAnimeEnd}>
         <span
           className={`block w-full h-full ${styles.fb} ${fadeout ? styles.op : ""}`}
           onTransitionEnd={unloadFocus}></span>
       </span>
     </>}
-    {name && <div className={`absolute text-2xl left-0 top-0 flex justify-center w-full ${styles.gameName} ${focused ? "opacity-100" : "opacity-0"}`}>{name}</div>}
+    {name && <div className={`absolute text-[24px] left-0 top-0 flex justify-center w-full ${styles.gameName} ${focused ? "opacity-100" : "opacity-0"}`}>{name}</div>}
   </div>;
 
 

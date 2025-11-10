@@ -1,50 +1,50 @@
-import { use, useEffect, useRef } from "react";
-import naviix from "naviix";
+import { use, useRef, useState } from "react";
 import "./App.css";
-import BottomBar from "./components/feat/bottom-bar";
-import FuncsBar from "./components/feat/funcs-bar";
-import TopBar from "./components/feat/top-bar";
-import ScrollView from "./components/kit/scroll-view";
-import { HomeNvxContext, BorderAnimeContext, SoundContext } from "./context";
+import { BorderAnimeContext, SoundContext, PageContext } from "./context";
 import SoundProvider from "./components/context/sound";
-import HomeKey from "./components/feat/home-key";
+import Home from "./components/page/home";
+import { AnimatePresence, motion } from "motion/react";
+import Settings from "./components/page/settings";
 
 function App() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nvxRef = useRef<any>(null);
+  const [page, setP] = useState("home");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const focusedRef = useRef<any>(new Map());
 
-  useEffect(() => {
-    const nvx1 = [...document.getElementsByClassName("nvx")];
-    const nvx2 = [...document.getElementsByClassName("nvx2")];
-    const nvx3 = [...document.getElementsByClassName("nvx3")]; // 底部功能区
-    nvxRef.current = naviix({
-      locs: nvx1,
-      subs: [{
-        locs: nvx2,
-        wrap: document.getElementById("gms") as HTMLElement,
-      }, {
-        locs: nvx3,
-        wrap: document.getElementById("funcs") as HTMLElement,
-      }]
-    }, { scroll: true });
-  }, []);
+  const pageCtxVal = {
+    page,
+    setP,
+  };
+
+  const motionProps = {
+    initial: { opacity: 0, scale: 0.6 },
+    animate: {
+        opacity: 1,
+        scale: 1,
+        ease: [0.02, 0.35, 0.25, 0.99],
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.8,
+        ease: [0.46, 0.04, 0.97, 0.44],
+    },
+    transition: { duration: 0.3 },
+  }
 
   return (
-    <HomeNvxContext value={nvxRef}>
+    <PageContext value={pageCtxVal}>
       <BorderAnimeContext value={focusedRef}>
         <SoundProvider>
-          <HomeKey>
-            <UnlockBtn />
-            <TopBar />
-            <ScrollView />
-            <FuncsBar />
-            <BottomBar />
-          </HomeKey>
+          <UnlockBtn />
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={page} {...motionProps} className="w-full h-full">
+              {page === "home" && <Home />}
+              {page === "settings" && <Settings />}
+            </motion.div>
+          </AnimatePresence>
         </SoundProvider>
       </BorderAnimeContext>
-    </HomeNvxContext>
+    </PageContext>
   );
 }
 
@@ -52,7 +52,7 @@ function UnlockBtn() {
 
   const soundContext = use(SoundContext);
 
-  return <button onClick={unlockSound}>unlock sound</button>;
+  return <button onClick={unlockSound} className="fixed z-20">unlock sound</button>;
 
   function unlockSound() {
     console.log(soundContext?.unlockNLoad)

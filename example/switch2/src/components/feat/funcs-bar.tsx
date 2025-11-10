@@ -1,6 +1,10 @@
+import { use } from "react";
 import FuncBtn from "../kit/func-btn/index";
+import { PageContext } from "@/context";
 
 export default function FuncsBar() {
+
+  const pageCtx = use(PageContext);
 
   return <div className="absolute w-full flex justify-center gap-[18px] bottom-[140px]" id="funcs">
     <FuncBtn className="bg-[#e60012] border-0" name="Nintendo Switch Online"></FuncBtn>
@@ -10,7 +14,12 @@ export default function FuncsBar() {
     <FuncBtn name="游戏分享"></FuncBtn>
     <FuncBtn name="手柄"></FuncBtn>
     <FuncBtn name="虚拟游戏卡"></FuncBtn>
-    <FuncBtn name="设置"></FuncBtn>
+    <FuncBtn name="设置" onClick={settingsPage}></FuncBtn>
     <FuncBtn name="休眠模式">123</FuncBtn>
   </div>;
+
+  function settingsPage() {
+    console.log("go settings")
+    pageCtx?.setP("settings");
+  }
 }

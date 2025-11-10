@@ -56,7 +56,7 @@ export default function ScrollView() {
   }, []);
 
   return <div id="gms"
-    className="w-full max-w-7xl overflow-x-auto flex gap-[14px] items-center px-[107px] py-16 scrollbar-hide absolute top-[130px]"
+    className="w-full max-w-[1280px] overflow-x-auto flex gap-[14px] items-center px-[107px] py-[64px] scrollbar-hide absolute top-[130px]"
     ref={wrapE}
     onKeyDown={keyNav}
     onKeyUp={keyUp}>

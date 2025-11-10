@@ -118,3 +118,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+#root {
+  font-size: inherit;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE 和旧版 Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, 新版 Edge */
+}

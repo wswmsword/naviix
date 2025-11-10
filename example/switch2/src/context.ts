@@ -10,3 +10,8 @@ export const SoundContext = createContext<{
     playSound: (name: string, when?: number) => void;
     unlockNLoad: () => Promise<void>;
 } | null>(null);
+
+export const PageContext = createContext<{
+    page: string;
+    setP: React.Dispatch<React.SetStateAction<string>>;
+} | null>(null);
