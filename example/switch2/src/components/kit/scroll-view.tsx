@@ -1,16 +1,15 @@
-import { use, useEffect, useRef, type KeyboardEvent } from "react";
-import GameBtn from "./game-btn";
-import { HomeNvxContext, BorderAnimeContext } from "@/context";
+import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
+
+interface Props {
+  children: ReactNode
+  next: (cur: Element|null, dir: string) => HTMLElement|null
+  onEdge?: (cur: Element|null, dir: string) => void
+}
 
 /** 长按则滚动，滚动速度由焦点聚焦导航的速度一致，点按有独立的滚动速度，raf 实现 */
-export default function ScrollView() {
-  const games = [{
-    src: "/src/assets/game/tok.avif",
-    name: "塞尔达传说 王国之泪",
-  }, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+export default function ScrollView({ children, next, onEdge }: Props) {
+  
   const wrapE = useRef<HTMLDivElement>(null);
-  const nvx = use(HomeNvxContext);
-  const focusRef = use(BorderAnimeContext);
 
   let isKeyPressed = false;
   let isKeyLongPressed = false;
@@ -23,6 +22,7 @@ export default function ScrollView() {
   const focusedFirst = useRef(false);
   const moveRRafId = useRef<number>(-1);
   const safeScrollRafId = useRef<number>(-1);
+  const dirKeys = ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"];
 
   useEffect(() => {
     detectRefreshRate(rate => {
@@ -60,14 +60,11 @@ export default function ScrollView() {
     ref={wrapE}
     onKeyDown={keyNav}
     onKeyUp={keyUp}>
-    {games.map((g, i) => <GameBtn
-      src={g.src}
-      name={g.name}
-      key={i} />)}
+    {children}
   </div>;
 
   function keyUp(e: KeyboardEvent) {
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    if (dirKeys.includes(e.key)) {
       isKeyPressed = false;
       isKeyLongPressed = false;
       cancelAnimationFrame(moveRRafId.current);
@@ -75,146 +72,123 @@ export default function ScrollView() {
   }
 
   function keyNav(e: KeyboardEvent) {
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft") e.preventDefault();
-    if (e.key === "ArrowRight" && !isKeyPressed) {
+    const dirMap = new Map([
+      [dirKeys[0], "right"],
+      [dirKeys[1], "left"],
+      [dirKeys[2], "up"],
+      [dirKeys[3], "down"],
+    ]);
+    const dir: string|undefined = dirMap.get(e.key);
+    if (dir !== undefined) e.preventDefault();
+    if (dir !== undefined && !isKeyPressed) {
       isKeyPressed = true;
       isKeyLongPressed = false;
       focusedFirst.current = false;
       e.preventDefault();
       cancelAnimationFrame(safeScrollRafId.current);
-      moveRRafId.current = requestAnimationFrame(moveR)
+      moveRRafId.current = requestAnimationFrame(move)
+      
+    }
 
-      // 聚焦
-      // 控制滚动，滚动到安全区域
-      let lastFocusTime = -Infinity;
+    // 聚焦
+    // 控制滚动，滚动到安全区域
+    let lastFocusTime = -Infinity;
 
-      function moveR() {
-        const cur = Date.now();
-        const nextInfo = nvx?.current.right(document.activeElement);
-        if (nextInfo) {
-          const nextE = nextInfo.id;
-          const _wrapE = wrapE.current as HTMLDivElement;
+    function move() {
+      const cur = Date.now();
+      const nextE = next(document.activeElement, dir as string);
+      if (nextE) {
+        const _wrapE = wrapE.current as HTMLDivElement;
+        const outViewFunc = ["left", "right"].includes(dir || "") ? isElementOutOfHorizontalView : isElementOutOfVerticalView;
+        const isOutOfView = outViewFunc(nextE.parentElement as HTMLElement, _wrapE);
 
-          const isOutOfView = isElementOutOfHorizontalView(nextE.parentElement, _wrapE);
+        if (isOutOfView) {
+          _wrapE.scrollLeft += dynamicSpeed.current;
+          moveRRafId.current = requestAnimationFrame(move);
+          return ;
+        }
 
-          if (isOutOfView) {
-            _wrapE.scrollLeft += dynamicSpeed.current;
-            moveRRafId.current = requestAnimationFrame(moveR);
-            return ;
-          }
-
-          if (!focusedFirst.current) {
-            focusedFirst.current = true;
+        if (!focusedFirst.current) {
+          focusedFirst.current = true;
+          lastFocusTime = cur;
+          focusNext(nextE);
+          scrollToSafeArea();
+          return ;
+        } else if (!isKeyLongPressed) {
+          if (cur - lastFocusTime > longPressTime) {
+            isKeyLongPressed = true;
             lastFocusTime = cur;
             focusNext(nextE);
             scrollToSafeArea();
-            return ;
-          } else if (!isKeyLongPressed) {
-            if (cur - lastFocusTime > longPressTime) {
-              isKeyLongPressed = true;
-              lastFocusTime = cur;
-              focusNext(nextE);
-              scrollToSafeArea();
-            } else moveRRafId.current = requestAnimationFrame(moveR);
-          } else {
-            if (cur - lastFocusTime > focusInterval) {
-              lastFocusTime = cur;
-              focusNext(nextE);
-              scrollToSafeArea();
-            } else moveRRafId.current = requestAnimationFrame(moveR);
-          }
-
-          function scrollToSafeArea() {
-            const elRight = nextE.parentElement.offsetLeft + nextE.offsetWidth;
-            const wrapRight = _wrapE.scrollLeft + _wrapE.clientWidth;
-            if (wrapRight - elRight > safeWidth) {
-              if (isKeyPressed) moveR();
-              return ;
-            }
-            _wrapE.scrollLeft += dynamicSpeed.current;
-            safeScrollRafId.current = requestAnimationFrame(scrollToSafeArea);
-          }
-          return ;
+          } else moveRRafId.current = requestAnimationFrame(move);
         } else {
-          if (!isKeyLongPressed) {
-            if (cur - lastFocusTime > longPressTime) {
-              isKeyLongPressed = true;
-              focusRef?.current.get(document.activeElement).right(true);
-            } else moveRRafId.current = requestAnimationFrame(moveR);
-          } else {
-            focusRef?.current.get(document.activeElement).right(true);
+          if (cur - lastFocusTime > focusInterval) {
+            lastFocusTime = cur;
+            focusNext(nextE);
+            scrollToSafeArea();
+          } else moveRRafId.current = requestAnimationFrame(move);
+        }
+
+        function scrollToSafeArea() {
+          if (nextE == null || nextE.parentElement == null) return ;
+          switch (dir) {
+            case "right": {
+              const elRight = nextE.parentElement.offsetLeft + nextE.offsetWidth;
+              const wrapRight = _wrapE.scrollLeft + _wrapE.clientWidth;
+              if (wrapRight - elRight > safeWidth) {
+                if (isKeyPressed) move();
+                return ;
+              }
+              _wrapE.scrollLeft += dynamicSpeed.current;
+              safeScrollRafId.current = requestAnimationFrame(scrollToSafeArea);
+              break;
+            }
+            case "left": {
+              const elRight = nextE.parentElement.offsetLeft;
+              const wrapRight = _wrapE.scrollLeft;
+              if (elRight - wrapRight > safeWidth) {
+                if (isKeyPressed) move();
+                return ;
+              }
+              _wrapE.scrollLeft -= dynamicSpeed.current;
+              safeScrollRafId.current = requestAnimationFrame(scrollToSafeArea);
+              break;
+            }
+            case "up": {
+              const elRight = nextE.parentElement.offsetTop;
+              const wrapRight = _wrapE.scrollTop;
+              if (elRight - wrapRight > safeWidth) {
+                if (isKeyPressed) move();
+                return ;
+              }
+              _wrapE.scrollTop -= dynamicSpeed.current;
+              safeScrollRafId.current = requestAnimationFrame(scrollToSafeArea);
+              break;
+            }
+            case "down": {
+              const elRight = nextE.parentElement.offsetTop + nextE.offsetHeight;
+              const wrapRight = _wrapE.scrollTop + _wrapE.clientHeight;
+              if (wrapRight - elRight > safeWidth) {
+                if (isKeyPressed) move();
+                return ;
+              }
+              _wrapE.scrollTop += dynamicSpeed.current;
+              safeScrollRafId.current = requestAnimationFrame(scrollToSafeArea);
+              break;
+            }
+            default:
+              break;
           }
         }
-      }
-      
-    } else if (e.key === "ArrowLeft" && !isKeyPressed) {
-      isKeyPressed = true;
-      isKeyLongPressed = false;
-      focusedFirst.current = false;
-      e.preventDefault();
-      cancelAnimationFrame(safeScrollRafId.current);
-      moveRRafId.current = requestAnimationFrame(moveR)
-
-      // 聚焦
-      // 控制滚动，滚动到安全区域
-      let lastFocusTime = -Infinity;
-
-      function moveR() {
-        const cur = Date.now();
-        const nextInfo = nvx?.current.left(document.activeElement);
-        if (nextInfo) {
-          const nextE = nextInfo.id;
-          const _wrapE = wrapE.current as HTMLDivElement;
-
-          const isOutOfView = isElementOutOfHorizontalView(nextE.parentElement, _wrapE);
-
-          if (isOutOfView) {
-            _wrapE.scrollLeft -= dynamicSpeed.current;
-            moveRRafId.current = requestAnimationFrame(moveR);
-            return ;
-          }
-
-          if (!focusedFirst.current) {
-            focusedFirst.current = true;
-            lastFocusTime = cur;
-            focusNext(nextE);
-            scrollToSafeArea();
-            return ;
-          } else if (!isKeyLongPressed) {
-            if (cur - lastFocusTime > longPressTime) {
-              isKeyLongPressed = true;
-              lastFocusTime = cur;
-              focusNext(nextE);
-              scrollToSafeArea();
-            } else moveRRafId.current = requestAnimationFrame(moveR);
-          } else {
-            if (cur - lastFocusTime > focusInterval) {
-              lastFocusTime = cur;
-              focusNext(nextE);
-              scrollToSafeArea();
-            } else moveRRafId.current = requestAnimationFrame(moveR);
-          }
-
-          function scrollToSafeArea() {
-            const elRight = nextE.parentElement.offsetLeft;
-            const wrapRight = _wrapE.scrollLeft;
-            if (elRight - wrapRight > safeWidth) {
-              if (isKeyPressed) moveR();
-              return ;
-            }
-            _wrapE.scrollLeft -= dynamicSpeed.current;
-            safeScrollRafId.current = requestAnimationFrame(scrollToSafeArea);
-          }
-          return ;
+        return ;
+      } else {
+        if (!isKeyLongPressed) {
+          if (cur - lastFocusTime > longPressTime) {
+            isKeyLongPressed = true;
+            if (onEdge) onEdge(document.activeElement, dir as string);
+          } else moveRRafId.current = requestAnimationFrame(move);
         } else {
-          if (!isKeyLongPressed) {
-            if (cur - lastFocusTime > longPressTime) {
-              isKeyLongPressed = true;
-              focusRef?.current.get(document.activeElement).left(true);
-            } else moveRRafId.current = requestAnimationFrame(moveR);
-          } else {
-            focusRef?.current.get(document.activeElement).left(true);
-          }
+          if (onEdge) onEdge(document.activeElement, dir as string);
         }
       }
     }
@@ -246,6 +220,17 @@ export default function ScrollView() {
     const viewRight = viewLeft + container.clientWidth;
 
     return elLeft > viewRight || elRight < viewLeft;
+  }
+
+  /** 元素完全没有进入纵向视图 */
+  function isElementOutOfVerticalView(el: HTMLElement, container: HTMLElement) {
+    const elTop = el.offsetTop;
+    const elBottom = elTop + el.offsetHeight;
+    
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+
+    return elTop > viewBottom || elBottom < viewTop;
   }
 
   /** 元素完全进入视图 */

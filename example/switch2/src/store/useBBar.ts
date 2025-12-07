@@ -1,7 +1,10 @@
 import { create } from 'zustand'
 
 interface State {
-  context: "main" | "bbar" | "tbar"
+  context: "main" | "bbar" | "tbar",
+  setMainContext: () => void,
+  setBottomBarContext: () => void,
+  setTopBarContext: () => void,
 }
 
 const useButtomBar = create<State>((set) => ({

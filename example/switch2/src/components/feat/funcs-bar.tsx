@@ -14,7 +14,7 @@ export default function FuncsBar() {
     <FuncBtn name="游戏分享"></FuncBtn>
     <FuncBtn name="手柄"></FuncBtn>
     <FuncBtn name="虚拟游戏卡"></FuncBtn>
-    <FuncBtn name="设置" onClick={settingsPage}></FuncBtn>
+    <FuncBtn name="设置" onDelayClick={settingsPage}></FuncBtn>
     <FuncBtn name="休眠模式">123</FuncBtn>
   </div>;
 

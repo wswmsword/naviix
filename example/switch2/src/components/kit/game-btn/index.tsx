@@ -3,10 +3,12 @@ import styles from "./index.module.css";
 import { BorderAnimeContext } from "@/context";
 import clsx from "clsx";
 import { SoundContext } from "@/context";
+import useButtomBar from "@/store/useBBar";
 
 export default function GameBtn({ src, name }: { src?: string, name?: string }) {
 
   const focusedRef = use(BorderAnimeContext);
+  const { setMainContext } = useButtomBar();
   const soundCtx = use(SoundContext);
 
   const [a1, setA] = useState(false);
@@ -102,6 +104,7 @@ export default function GameBtn({ src, name }: { src?: string, name?: string }) 
   function onFocus() {
     soundCtx?.playSound("select");
     setF(true);
+    setMainContext();
   }
 
   function onBlur() {

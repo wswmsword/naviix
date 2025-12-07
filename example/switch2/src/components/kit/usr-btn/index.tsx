@@ -2,11 +2,14 @@ import { use, useEffect, useState, type AnimationEvent, type KeyboardEvent } fro
 import styles from "./index.module.css";
 import clsx from "clsx";
 import { cn } from "@/lib/utils";
-import { BorderAnimeContext } from "@/context";
+import { BorderAnimeContext, SoundContext } from "@/context";
+import useButtomBar from "@/store/useBBar";
 
 export default function UsrBtn({ src, name, className }: { src: string, name: string } & React.ComponentProps<"button">) {
 
   const focusedRef = use(BorderAnimeContext);
+  const { setTopBarContext } = useButtomBar();
+  const soundCtx = use(SoundContext);
 
   const [a1, setA] = useState(false);
   const [a2, setA2] = useState(false);
@@ -103,7 +106,9 @@ export default function UsrBtn({ src, name, className }: { src: string, name: st
   }
 
   function onFocus() {
+    soundCtx?.playSound("select");
     setF(true);
+    setTopBarContext();
   }
 
   function onBlur() {

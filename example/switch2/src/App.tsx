@@ -16,6 +16,20 @@ function App() {
     setP,
   };
 
+  return (
+    <PageContext value={pageCtxVal}>
+      <SoundProvider>
+        <BorderAnimeContext value={focusedRef}>
+          {/* <UnlockBtn /> */}
+          <MotionDiv page={page} />
+        </BorderAnimeContext>
+      </SoundProvider>
+    </PageContext>
+  );
+}
+
+function MotionDiv({ page }: { page: string }) {
+  const soundContext = use(SoundContext);
   const motionProps = {
     initial: { opacity: 0, scale: 0.6 },
     animate: {
@@ -30,32 +44,14 @@ function App() {
     },
     transition: { duration: 0.3 },
   }
-
-  return (
-    <PageContext value={pageCtxVal}>
-      <BorderAnimeContext value={focusedRef}>
-        <SoundProvider>
-          <UnlockBtn />
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={page} {...motionProps} className="w-full h-full">
-              {page === "home" && <Home />}
-              {page === "settings" && <Settings />}
-            </motion.div>
-          </AnimatePresence>
-        </SoundProvider>
-      </BorderAnimeContext>
-    </PageContext>
-  );
-}
-
-function UnlockBtn() {
-
-  const soundContext = use(SoundContext);
-
-  return <button onClick={unlockSound} className="fixed z-20">unlock sound</button>;
+  return <AnimatePresence mode="wait" initial={false}>
+    <motion.div key={page} {...motionProps} className="w-full h-full" onClick={unlockSound} onKeyDown={unlockSound}>
+      {page === "home" && <Home />}
+      {page === "settings" && <Settings />}
+    </motion.div>
+  </AnimatePresence>;
 
   function unlockSound() {
-    console.log(soundContext?.unlockNLoad)
     soundContext?.unlockNLoad();
   }
 }

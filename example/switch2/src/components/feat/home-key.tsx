@@ -1,5 +1,5 @@
 import { use, useRef, type KeyboardEvent, type ReactNode } from "react";
-import { HomeNvxContext, BorderAnimeContext } from "@/context";
+import { HomeNvxContext, BorderAnimeContext, SoundContext } from "@/context";
 
 const keyDirMap = new Map([
   ["ArrowLeft", "left"],
@@ -18,6 +18,7 @@ export default function HomeKey({ children }: { children: ReactNode }) {
 
   const nvx = use(HomeNvxContext);
   const focusRef = use(BorderAnimeContext);
+  const soundCtx = use(SoundContext);
 
   return <div
     className="relative w-full h-full bg-[#ebebeb]"
@@ -56,6 +57,7 @@ export default function HomeKey({ children }: { children: ReactNode }) {
         nextInfo.id.focus({ preventScroll: true });
         if (callback) callback();
       } else {
+        soundCtx?.playSound("border");
         focusRef?.current.get(document.activeElement)?.[dir as string](true);
       }
     }

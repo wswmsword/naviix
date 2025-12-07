@@ -10,9 +10,12 @@ export default function SoundProvider({ children }: { children: ReactNode }) {
   // 用于缓存解码后的音频数据
   const bufferCache = useRef(new Map());
 
+  const loadedSound = useRef(false);
+
   // 要加载的声音文件映射（key -> url）
   const sounds = {
     select: 'src/assets/sound/Select.mp3',     // 替换成真实文件路径
+    border: 'src/assets/sound/Border.wav',
   };
 
   const contextVal = useMemo(() => ({
@@ -45,7 +48,9 @@ export default function SoundProvider({ children }: { children: ReactNode }) {
 
   async function unlockNLoad() {
     try {
+      if (loadedSound.current) return ;
       if (ctx.current.state === 'suspended') await ctx.current.resume();
+      loadedSound.current = true;
       // 只在首次点击时加载音频（避免自动下载）
       await loadAll();
       console.log('Audio unlocked and sounds loaded.');

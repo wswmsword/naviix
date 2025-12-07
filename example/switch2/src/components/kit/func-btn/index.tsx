@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import styles from "./index.module.css";
 import { useRef, useState, type KeyboardEvent, type MouseEvent, type AnimationEvent, useEffect, use } from "react";
 import clsx from "clsx";
-import { BorderAnimeContext } from "@/context";
+import { BorderAnimeContext, SoundContext } from "@/context";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,12 +13,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import useButtomBar from "@/store/useBBar";
+
+type E = MouseEvent<HTMLButtonElement>|KeyboardEvent<HTMLButtonElement>
 
 /** 伴随按钮动画结束执行操作，或延迟指定时间执行操作（延迟时间内忽略其它操作） */
-export default function FuncBtn({ className, children, onClick: _oc, name }: React.ComponentProps<"button">) {
+export default function FuncBtn({ className, children, onDelayClick: _oc, name }: React.ComponentProps<"button"> & { onDelayClick?: (e:E) => void }) {
 
   const [animating, setA] = useState(false);
-  const clickE = useRef<MouseEvent<HTMLButtonElement>>(null);
+  const clickE = useRef<E>(null);
+  const { setBottomBarContext } = useButtomBar();
+  const soundCtx = use(SoundContext);
 
   const focusedRef = use(BorderAnimeContext);
 
@@ -96,9 +101,10 @@ export default function FuncBtn({ className, children, onClick: _oc, name }: Rea
     {name && <div className={`absolute text-[24px] left-0 bottom-0 flex flex-nowrap justify-center w-full whitespace-nowrap ${styles.funcName} ${focused ? "opacity-100" : "opacity-0"}`}>{name}</div>}
   </div>;
 
-  function onKeyD(e: KeyboardEvent) {
+  function onKeyD(e: KeyboardEvent<HTMLButtonElement>) {
     if (animating) return;
     if (e.code === "Space" || e.code === "Enter") {
+      clickE.current = e;
       setA(true);
       e.preventDefault();
     }
@@ -130,7 +136,9 @@ export default function FuncBtn({ className, children, onClick: _oc, name }: Rea
   }
 
   function onFocus() {
+    soundCtx?.playSound("select");
     setF(true);
+    setBottomBarContext();
   }
 
   function onBlur() {
