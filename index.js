@@ -360,11 +360,11 @@ function getX(rects, notRoot) {
     mergedX = x;
   }
 
-  rects.forEach(({ locs, subs, wrap }) => {
+  rects.forEach(({ locs, subs, wrap, loop }) => {
     const subWraps = (subs || []).map(s => s.wrap);
     if (wrap) firstInWrap.set(wrap.id, locs[0]);
     const newLocs = locs.concat(subWraps);
-    const { x } = getXBySimple(newLocs, wrap, subWraps);
+    const { x } = getXBySimple(newLocs, wrap, subWraps, loop);
     improveHelperDataByX(x);
     const { x: subsX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(subs || [], true);
     mergedX = new Map(Array.from(mergedX).concat(Array.from(x)).concat(Array.from(subsX)));
@@ -415,24 +415,30 @@ function getX(rects, notRoot) {
   }
 }
 
-function getXBySimple(rects, wrap, subWraps = []) {
+function getXBySimple(rects, wrap, subWraps = [], loop) {
   const sortedX = [...rects];
   sortedX.sort((s1, s2) => s1.loc[0] - s2.loc[0]);
   const sortedY = [...rects];
   sortedY.sort((s1, s2) => s1.loc[1] - s2.loc[1]);
   const dirMap = new Map();
   let surroundedI = 0;
+  const headRect = rects[0];
+  const tailRect = rects.slice(-1)[0];
+  const rowLoop = loop === "row";
+  const colLoop = loop === "col";
 
   rects.forEach(s => {
+    const isHead = headRect === s;
+    const isTail = tailRect === s;
     const sOrderY = sortedY.findIndex(e => e.id === s.id);
     const sOrderX = sortedX.findIndex(e => e.id === s.id);
 
     // next down element
     let minDownDis = Infinity;
-    let downS = wrap; // 默认指向包裹层
-    let gotDown = false;
+    let downS = isTail && colLoop ? headRect : wrap; // 默认指向包裹层
+    let gotDown = downS === headRect;
     let gotFirstDProj = false; // 获得过投影后增加 1 次比较
-    for (let i = sOrderY - 1; i > -1; -- i) { // 从距离元素最近的位置寻找
+    if (gotDown === false) for (let i = sOrderY - 1; i > -1; -- i) { // 从距离元素最近的位置寻找
       const s2 = sortedY[i];
       const { dis, isProj, isRestrictProj } = getMinDownDis(s.loc, s2.loc);
 
@@ -452,10 +458,10 @@ function getXBySimple(rects, wrap, subWraps = []) {
 
     // next up element
     let minUpDis = Infinity;
-    let upS = wrap;
-    let gotUp = false;
+    let upS = isHead && colLoop ? tailRect : wrap;
+    let gotUp = upS === tailRect;
     let gotFirstUProj = false; // 获得过投影后增加 1 次比较
-    for (let i = sOrderY + 1; i < sortedY.length; ++ i) {
+    if (gotUp === false) for (let i = sOrderY + 1; i < sortedY.length; ++ i) {
       const s2 = sortedY[i];
       const { dis, isProj, isRestrictProj } = getMinUpDis(s.loc, s2.loc);
 
@@ -473,10 +479,10 @@ function getXBySimple(rects, wrap, subWraps = []) {
 
     // next left element
     let minLDis = Infinity;
-    let lS = wrap;
-    let gotLeft = false;
+    let lS = isHead && rowLoop ? tailRect : wrap;
+    let gotLeft = lS === tailRect;
     let gotFirstLProj = false;
-    for (let i = sOrderX - 1; i > -1; -- i) {
+    if (gotLeft === false) for (let i = sOrderX - 1; i > -1; -- i) {
       const s2 = sortedX[i];
       const { dis, isProj, isRestrictProj } = getMinLeftDis(s.loc, s2.loc);
 
@@ -494,10 +500,10 @@ function getXBySimple(rects, wrap, subWraps = []) {
 
     // next right element
     let minRDis = Infinity;
-    let rS = wrap;
-    let gotRight = false;
+    let rS = isTail && rowLoop ? headRect : wrap;
+    let gotRight = rS === headRect;
     let gotFirstRProj = false;
-    for (let i = sOrderX + 1; i < sortedX.length; ++ i) {
+    if (gotRight === false) for (let i = sOrderX + 1; i < sortedX.length; ++ i) {
       const s2 = sortedX[i];
       const { dis, isProj, isRestrictProj } = getMinRightDis(s.loc, s2.loc);
 
@@ -677,8 +683,8 @@ function formatIpt(input) {
     formatted = [{ locs: input.map((s) => Array.isArray(s) ?
       { id: s, loc: s } : getElementNObjLoc(s)) }];
   } else if (objIpt) {
-    const { wrap, subs, locs } = input;
-    formatted = [{ locs: formatIpt(locs)[0].locs }];
+    const { wrap, subs, locs, ...otherOpts } = input;
+    formatted = [{ locs: formatIpt(locs)[0].locs, ...otherOpts }];
     if (subs != null) {
       Object.assign(formatted[0], {
         subs: formatIpt(input.subs),
@@ -691,10 +697,11 @@ function formatIpt(input) {
     }
   } else if (normalIpt) {
     formatted = input.map((item) => {
-      const { locs, wrap, subs } = item;
+      const { locs, wrap, subs, ...otherOpts } = item;
       const res = {
         locs: formatIpt(locs)[0].locs,
         wrap: Array.isArray(wrap) ? { loc: wrap, id: wrap } : getElementNObjLoc(wrap),
+        ...otherOpts,
       };
       if (subs) {
         Object.assign(res, {
@@ -774,7 +781,8 @@ function getElementAryLoc(e) {
 }
 
 function istanceofHtmlElement(o) {
-  return o instanceof HTMLElement;
+  return false;
+  // return o instanceof HTMLElement;
 }
 
 /**

@@ -470,5 +470,30 @@ describe("naviix", function () {
     const res = naviix([r1, r2, r3, r4]);
     assert.equal(res.get(r1).down.id, r3);
   });
+
+  it.only("循环", function() {
+    const r1 = [1, 1, 1, 1];
+    const r2 = [4, 1, 1, 1];
+    const r3 = [7, 1, 1, 1];
+
+    const res = naviix({ locs: [r1, r2, r3], loop: "row" });
+    assert.equal(res.get(r1).left.id, r3);
+    assert.equal(res.get(r3).right.id, r1);
+    assert.equal(res.get(r1).up, undefined);
+    assert.equal(res.get(r3).down, undefined);
+
+    const { left, right } = naviix({ locs: [r1, r2, r3], loop: "row" }, { scroll: true });
+    assert.equal(left(r1).id, r3);
+    assert.equal(right(r3).id, r1);
+
+    const r4 = [5, 8, 1, 1];
+    const r5 = [5, 5, 1, 1];
+    const r6 = [5, 2, 1, 1];
+
+    const { up, down } = naviix({ locs: [r4, r5, r6], loop: "col" }, { scroll: true });
+    assert.equal(up(r4).id, r6);
+    assert.equal(down(r6).id, r4);
+  });
+
 }); 
 
