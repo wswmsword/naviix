@@ -471,7 +471,7 @@ describe("naviix", function () {
     assert.equal(res.get(r1).down.id, r3);
   });
 
-  it.only("循环", function() {
+  it("循环", function() {
     const r1 = [1, 1, 1, 1];
     const r2 = [4, 1, 1, 1];
     const r3 = [7, 1, 1, 1];

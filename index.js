@@ -114,18 +114,18 @@ export default function naviix(rects, config = {}) {
       scroll(newX) {
         updateRawXByScroll(x, newX);
       },
-      left: (id, fuzzy) => getScrollDirX(id, "left", "right", getMinLeftDis, fuzzy),
-      up: (id, fuzzy) => getScrollDirX(id, "up", "down", getMinUpDis, fuzzy),
-      right: (id, fuzzy) => getScrollDirX(id, "right", "left", getMinRightDis, fuzzy),
-      down: (id, fuzzy) => getScrollDirX(id, "down", "up", getMinDownDis, fuzzy),
+      left: (id, { fuzzy, momentCache } = {}) => getScrollDirX(id, "left", "right", getMinLeftDis, fuzzy, momentCache),
+      up: (id, { fuzzy, momentCache } = {}) => getScrollDirX(id, "up", "down", getMinUpDis, fuzzy, momentCache),
+      right: (id, { fuzzy, momentCache } = {}) => getScrollDirX(id, "right", "left", getMinRightDis, fuzzy, momentCache),
+      down: (id, { fuzzy, momentCache } = {}) => getScrollDirX(id, "down", "up", getMinDownDis, fuzzy, momentCache),
       update,
       more,
     };
 
-    function getScrollDirX(id, dir, antiDir, calcMinDis, fuzzy) {
+    function getScrollDirX(id, dir, antiDir, calcMinDis, fuzzy, cache) {
 
       const [mid, mdir, mtid] = momentCache;
-      if (id === mid && dir === mdir) {
+      if (cache && id === mid && dir === mdir) {
         momentCache = [mtid, antiDir, mid];
         return (x.get(mtid) || {}).origin || null;
       }
