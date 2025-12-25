@@ -130,6 +130,7 @@ export default function naviix(rects, config = {}) {
         return (x.get(mtid) || {}).origin || null;
       }
       const idXInfo = x.get(id);
+      if (idXInfo == null) return idXInfo;
       const dirX = idXInfo[dir];
       const dirXIsWrap = idXInfo.nextWrap[dir];
       const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
@@ -248,6 +249,7 @@ export default function naviix(rects, config = {}) {
       const idXInfo = x.get(id);
       const { wrapId } = idXInfo;
       const dirX = idXInfo[dir];
+      if (dirX == null) return dirX;
       const dirXIsWrap = idXInfo.nextWrap[dir];
       const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
       const memo = memoMap.get(dirX.id) || {};
@@ -267,6 +269,7 @@ export default function naviix(rects, config = {}) {
           }
           if (targetX == null) targetX = genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
         }
+        if (targetX == null) return targetX;
         if (targetXWrapId == null) targetXWrapId = x.get(targetX.id).wrapId;
         if ((memoMap.get(wrapId) || {}).enter !== idXInfo.origin)
           updateMemo(idXInfo.origin, wrapId); // exit 的起始点
