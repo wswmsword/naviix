@@ -276,7 +276,7 @@ export default function naviix(rects, config = {}) {
         const targetX = memo.enter || genUserDirX(dir, dirX, dirXIsWrap, dirXIsSubWrap, rawX, firstInWrap);
         if ((memoMap.get(wrapId) || {}).enter !== idXInfo.origin)
           updateMemo(idXInfo.origin, wrapId); // enter 的起始点
-        updateMemo(targetX, dirX);
+        updateMemo(targetX, dirX.id);
         return targetX;
       } else {
         updateMemo(dirX, wrapId);
