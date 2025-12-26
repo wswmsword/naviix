@@ -135,19 +135,18 @@ export default function naviix(rects, config = {}) {
       const dirXIsWrap = idXInfo.nextWrap[dir];
       const dirXIsSubWrap = idXInfo.nextSubWrap[dir];
       const startLoc = calcLocIfE(idXInfo.origin);
+      let target = dirX;
       if (dirXIsWrap && dirX) { // exit
         // 找到所有父区内所有指向当前区（子区）左边框的矩形
         const allDirWrapX = getAllExitWrapX(dirX.id, antiDir);
-        const target = getNextWrapX(allDirWrapX);
-        if (target) momentCache = [target.id, antiDir, id];
-        return target;
+        target = getNextWrapX(allDirWrapX);
       } else if (dirXIsSubWrap) { // enter
         // 找到子区内所有指向子区右边框的矩形
         const allDirWrapX = getAllEnterWrapX(dirX.id, antiDir);
-        const target = getNextWrapX(allDirWrapX);
-        if (target) momentCache = [target.id, antiDir, id];
-        return target;
-      } else return dirX;
+        target = getNextWrapX(allDirWrapX);
+      }
+      if (target) momentCache = [target.id, antiDir, id];
+      return target;
 
       function getNextWrapX(allDirWrapX) {
         let res = null;
