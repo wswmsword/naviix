@@ -2,9 +2,9 @@
 const dirs = ["up", "right", "down", "left"];
 
 export default function naviix(rects, config = {}) {
-  const { memo, scroll, dev } = config;
+  const { memo, scroll, dev, fuzzy } = config;
   const formattedRects = formatIpt(rects);
-  const { x: rawX, firstInWrap, enterWrapX, exitWrapX, edgeX } = getX(formattedRects);
+  const { x: rawX, firstInWrap, enterWrapX, exitWrapX, edgeX } = getX(formattedRects, { fuzzy });
   const memoMap = new Map(); // { enter, exit: { up, down, left, right } }
 
   if (scroll) {
@@ -18,7 +18,7 @@ export default function naviix(rects, config = {}) {
   function update(wrapId, newRects) {
 
     const newFormattedRects = formatIpt(newRects);
-    const { x: newRawX, firstInWrap: newFirstInWrap, enterWrapX: newEnterWrapX, exitWrapX: newExitWrapX, edgeX: newEdgeX } = getX(newFormattedRects);
+    const { x: newRawX, firstInWrap: newFirstInWrap, enterWrapX: newEnterWrapX, exitWrapX: newExitWrapX, edgeX: newEdgeX } = getX(newFormattedRects, { fuzzy });
     const { rectsIncludeWrap, i } = cleanByFormattedRects(formattedRects, false);
     rectsIncludeWrap[i] = newFormattedRects[0];
     mergeMap(rawX, newRawX);
@@ -70,7 +70,7 @@ export default function naviix(rects, config = {}) {
     const formattedRects = formatIpt(newRects);
     Array.prototype.push.apply(formattedRects[0].locs, edgeXRects);
     Array.prototype.push.apply(formattedRects[0].subs, wrapEdgeXRects);
-    const { x: _rawX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(formattedRects);
+    const { x: _rawX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(formattedRects, { fuzzy });
 
     // combine rawX
     edgeXOfWrap.forEach(xId => {
@@ -342,7 +342,7 @@ export default function naviix(rects, config = {}) {
   }
 }
 
-function getX(rects, notRoot) {
+function getX(rects, { notRoot, fuzzy } = {}) {
   let mergedX = new Map();
   let firstInWrap = new Map();
   /** 从外部进入 */
@@ -357,7 +357,7 @@ function getX(rects, notRoot) {
     rects.forEach(s => {
       firstInWrap.set(s.wrap.id, s.locs[0]);
     });
-    const { x } = getXBySimple(wraps);
+    const { x } = getXBySimple(wraps, { fuzzy });
     improveHelperDataByX(x, true);
     mergedX = x;
   }
@@ -366,9 +366,9 @@ function getX(rects, notRoot) {
     const subWraps = (subs || []).map(s => s.wrap);
     if (wrap) firstInWrap.set(wrap.id, locs[0]);
     const newLocs = locs.concat(subWraps);
-    const { x } = getXBySimple(newLocs, wrap, subWraps, loop);
+    const { x } = getXBySimple(newLocs, { wrap, subWraps, loop, fuzzy });
     improveHelperDataByX(x);
-    const { x: subsX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(subs || [], true);
+    const { x: subsX, firstInWrap: _firstInWrap, enterWrapX: _enterWrapX, exitWrapX: _exitWrapX, edgeX: _edgeX } = getX(subs || [], { notRoot: true, fuzzy });
     mergedX = new Map(Array.from(mergedX).concat(Array.from(x)).concat(Array.from(subsX)));
     firstInWrap = new Map(Array.from(firstInWrap).concat(Array.from(_firstInWrap)));
     enterWrapX = new Map(Array.from(enterWrapX).concat(Array.from(_enterWrapX)));
@@ -417,7 +417,7 @@ function getX(rects, notRoot) {
   }
 }
 
-function getXBySimple(rects, wrap, subWraps = [], loop) {
+function getXBySimple(rects, { wrap, subWraps = [], loop, fuzzy } = {}) {
   const sortedX = [...rects];
   sortedX.sort((s1, s2) => s1.loc[0] - s2.loc[0]);
   const sortedY = [...rects];
@@ -442,7 +442,7 @@ function getXBySimple(rects, wrap, subWraps = [], loop) {
     let gotFirstDProj = false; // 获得过投影后增加 1 次比较
     if (gotDown === false) for (let i = sOrderY - 1; i > -1; -- i) { // 从距离元素最近的位置寻找
       const s2 = sortedY[i];
-      const { dis, isProj, isRestrictProj } = getMinDownDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinDownDis(s.loc, s2.loc, fuzzy);
 
       if (dis < minDownDis || (gotFirstDProj && isRestrictProj && dis <= minDownDis)) {
         gotDown = true;
@@ -465,7 +465,7 @@ function getXBySimple(rects, wrap, subWraps = [], loop) {
     let gotFirstUProj = false; // 获得过投影后增加 1 次比较
     if (gotUp === false) for (let i = sOrderY + 1; i < sortedY.length; ++ i) {
       const s2 = sortedY[i];
-      const { dis, isProj, isRestrictProj } = getMinUpDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinUpDis(s.loc, s2.loc, fuzzy);
 
       if (dis < minUpDis || (gotFirstUProj && isRestrictProj && dis <= minDownDis)) {
         gotUp = true;
@@ -486,7 +486,7 @@ function getXBySimple(rects, wrap, subWraps = [], loop) {
     let gotFirstLProj = false;
     if (gotLeft === false) for (let i = sOrderX - 1; i > -1; -- i) {
       const s2 = sortedX[i];
-      const { dis, isProj, isRestrictProj } = getMinLeftDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinLeftDis(s.loc, s2.loc, fuzzy);
 
       if (dis < minLDis || (gotFirstLProj && isRestrictProj && dis <= minDownDis)) {
         gotLeft = true;
@@ -507,7 +507,7 @@ function getXBySimple(rects, wrap, subWraps = [], loop) {
     let gotFirstRProj = false;
     if (gotRight === false) for (let i = sOrderX + 1; i < sortedX.length; ++ i) {
       const s2 = sortedX[i];
-      const { dis, isProj, isRestrictProj } = getMinRightDis(s.loc, s2.loc);
+      const { dis, isProj, isRestrictProj } = getMinRightDis(s.loc, s2.loc, fuzzy);
 
       if (dis < minRDis || (gotFirstRProj && isRestrictProj && dis <= minDownDis)) {
         gotRight = true;
